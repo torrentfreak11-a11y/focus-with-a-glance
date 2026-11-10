@@ -42,7 +42,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 let LANG = 'en';
 const T = {
   en: {
-    hello: 'Hello', waveBack: 'Wave back', welcome: 'Welcome to Focus with a glance', askName: 'What should I call you?',
+    hello: 'Hello', waveBack: 'Wave back', welcome: 'Welcome aboard', askName: 'What should I call you?',
     namePh: 'Your name', go: 'Continue', am: 'AM', pm: 'PM',
     Fajr: 'Fajr', Sunrise: 'Shuruq', Dhuhr: 'Dhuhr', Asr: 'Asr', Maghrib: 'Maghrib', Isha: 'Isha',
     prayer: 'Prayer', prayerTimes: 'Prayer times', in: 'in', loading: 'Loading', iqamaIn: 'Iqama in', iqama: 'Iqama',

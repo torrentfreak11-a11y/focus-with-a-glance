@@ -497,7 +497,7 @@ function ramadanInfo() {
   if (!fajr || !maghrib) return null;
   if (todayR && now < fajr) return { phase: 'suhoor', at: fajr, day: h0.d, from: null };
   if (todayR && now < maghrib) return { phase: 'iftar', at: maghrib, day: h0.d, from: fajr };
-  if (tomorrowR && now >= maghrib) return { phase: 'suhoor', at: prayerAt('Fajr', now, 1), day: h1.m === 9 ? h1.d : h0.d + 1, from: null };
+  if (tomorrowR && now >= maghrib) return { phase: 'suhoor', at: prayerAt('Fajr', now, 1), day: h1.d, from: null };
   return null;
 }
 
@@ -1091,7 +1091,7 @@ function onMedia(m) {
 /* ------------------------------------------------------------------ boot + loops */
 async function dropIn(target) {
   S.mode = target; animating = true;
-  const v = view(); swapLayer(v, 'in'); curKey = v.key; curLayer.style.opacity = '0';
+  const v = view(); swapLayer(v, 'drop'); curKey = v.key; curLayer.style.opacity = '0';
   measure();
   const R = visRect(), cx = CX();
   const M = $('#main'), B = $('#bB'), bar = $('#bar');

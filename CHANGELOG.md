@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.1.1
+
+- Fixed: on first launch the welcome text appeared before the glass finished dropping in
+- Fixed: the English welcome title was cut off ("Welcome aboard" now)
+- Fixed: Ramadan mode set to "always on" could show "Day 31" after Maghrib
+- For developers: `FOCUSGLANCE_ZOOM` (render the widget larger) and `FOCUSGLANCE_DATA` (separate profile folder)
+- README: screenshots
+
 ## 2.1.0
 
 - Settings window (gear on the clock card, or the tray icon), fully in English and Arabic

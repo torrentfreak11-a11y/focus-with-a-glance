@@ -8,9 +8,7 @@ English · العربية — free and open source
 
 **[⬇ Download the latest version](https://github.com/torrentfreak11-a11y/focus-with-a-glance/releases/latest)**
 
-<!-- Add screenshots to docs/screenshots and uncomment:
-<img src="docs/screenshots/compact.png" width="420"> <img src="docs/screenshots/prayer.png" width="420">
--->
+<img src="docs/screenshots/1-hero.jpg" alt="Focus with a glance: the full clock card in liquid glass at the top of the screen" width="900">
 
 </div>
 
@@ -40,6 +38,15 @@ arrows.
 | 🎨 **Look & position** | Accent and glass colors, tint, top left/center/right, any display |
 
 The whole interface, settings included, is available in **English and Arabic**, with full right-to-left layout.
+
+## Screenshots
+
+| | |
+|---|---|
+| ![Liquid motion: drip, land, split, merge](docs/screenshots/2-liquid.jpg) | ![Prayer times, adhan alert and iqama countdown](docs/screenshots/3-prayer.jpg) |
+| ![Ramadan mode, Hijri date and countdowns](docs/screenshots/4-ramadan.jpg) | ![The cards in Arabic, right to left](docs/screenshots/5-arabic.jpg) |
+| ![Media player with synced lyrics](docs/screenshots/6-music.jpg) | ![Meeting countdown, focus timer, world clock, weather](docs/screenshots/7-workday.jpg) |
+| ![The compact clock, volume overlay and meeting pill](docs/screenshots/8-invisible.jpg) | ![One notch replaces eight apps](docs/screenshots/9-replaces.jpg) |
 
 ## Install
 
@@ -93,6 +100,8 @@ Set these environment variables before starting the exe:
 | `FOCUSGLANCE_UI=<path to FocusGlance\ui>` | Load the UI from disk instead of the embedded copy (use *Reload widget* in the tray menu after editing) |
 | `FOCUSGLANCE_DEVTOOLS=1` | Enable WebView2 DevTools (F12) |
 | `FOCUSGLANCE_LOG=<file>` | Write a debug log, including JavaScript errors |
+| `FOCUSGLANCE_ZOOM=2.5` | Render the whole widget larger (1–4), for crisp recordings |
+| `FOCUSGLANCE_DATA=<folder>` | Use a separate settings/profile folder instead of `%LocalAppData%\FocusGlance` |
 
 ## Contributing
 

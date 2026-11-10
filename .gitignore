@@ -22,3 +22,6 @@ packaging/out/
 # OS
 Thumbs.db
 Desktop.ini
+
+# Promo originals (video + full-size ads); README uses docs/screenshots
+promo/

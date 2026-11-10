@@ -97,6 +97,9 @@ sealed class GlanceForm : Form
 {
     // Logical (96-dpi) size of the overlay window. Everything outside the visible glass is click-through.
     const int LogicalW = 460, LogicalH = 240;
+    // FOCUSGLANCE_ZOOM=2.5 renders the whole widget larger (crisp promo recordings)
+    static readonly float Zoom = float.TryParse(Environment.GetEnvironmentVariable("FOCUSGLANCE_ZOOM"),
+        System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var z) && z is >= 1 and <= 4 ? z : 1f;
 
     readonly WebView2 web = new();
     readonly System.Windows.Forms.Timer cursorTimer = new() { Interval = 30 };
@@ -172,7 +175,7 @@ sealed class GlanceForm : Form
     void PlaceWindow()
     {
         var screen = Screen.AllScreens.FirstOrDefault(s => s.DeviceName == Store.Monitor) ?? Screen.PrimaryScreen ?? Screen.AllScreens[0];
-        scale = DeviceDpi / 96f;
+        scale = DeviceDpi / 96f * Zoom;
         int w = (int)Math.Round(LogicalW * scale), h = (int)Math.Round(LogicalH * scale);
         var b = screen.Bounds;
         int x = Store.Position switch
@@ -194,6 +197,7 @@ sealed class GlanceForm : Form
             await web.EnsureCoreWebView2Async(await Web.Env());
             var core = web.CoreWebView2;
             Web.Configure(core);
+            if (Zoom != 1f) web.ZoomFactor = Zoom;
             core.WebMessageReceived += OnWebMessage;
             core.Navigate("https://glance.local/index.html");
         }

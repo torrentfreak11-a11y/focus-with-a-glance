@@ -20,7 +20,9 @@ public sealed class SettingsStore
     {
         get
         {
-            var d = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FocusGlance");
+            // FOCUSGLANCE_DATA=<folder> keeps a separate profile (demos, testing)
+            var d = Environment.GetEnvironmentVariable("FOCUSGLANCE_DATA") is { Length: > 0 } custom ? custom
+                  : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FocusGlance");
             Directory.CreateDirectory(d);
             return d;
         }
