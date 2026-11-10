@@ -1,0 +1,1163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Focus with a glance</title>
+<style>
+:root{
+  --spring:cubic-bezier(.3,1.38,.52,1);
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --fg:#fff; --fg2:rgba(255,255,255,.78); --fg3:rgba(255,255,255,.55);
+  --acc:#8fdcff; --acc2:#ffd27a; --glass:#0c0e16;
+  --shadow:0 1px 2px rgba(0,0,0,.7),0 0 8px rgba(0,0,0,.45);
+}
+html,body{margin:0;height:100%;background:transparent;overflow:hidden}
+body{font-family:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;color:var(--fg);
+  -webkit-user-select:none;user-select:none;cursor:default;font-size:11px;text-shadow:var(--shadow)}
+button{all:unset;cursor:pointer;display:inline-grid;place-items:center}
+svg{display:block}
+#stage{position:absolute;inset:0;transform-origin:var(--ox,50%) 0;transition:transform .38s var(--spring)}
+#stage.zoom{transform:scale(1.24)}
+
+/* liquid layer: every shape here is merged by the goo filter */
+#goo{position:absolute;inset:0;filter:url(#liquid);pointer-events:none}
+.blob{position:absolute;background:var(--glass);border-radius:20px;left:50%;top:-40px;width:0;height:0}
+#main,#bar,#lyb{transition:left .56s var(--spring),top .56s var(--spring),width .56s var(--spring),height .56s var(--spring),border-radius .5s var(--ease),opacity .3s}
+#bA,#bB{display:none}
+
+/* glass sheen on top of the liquid */
+.glassy{position:absolute;pointer-events:none;
+  transition:left .56s var(--spring),top .56s var(--spring),width .56s var(--spring),height .56s var(--spring),border-radius .5s var(--ease),opacity .25s}
+#sheen{background:
+   radial-gradient(120% 70% at 20% -10%,rgba(255,255,255,.26),rgba(255,255,255,0) 55%),
+   linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,0) 45%,rgba(255,255,255,0) 70%,rgba(255,255,255,.07));
+   box-shadow:inset 0 -1px 0 rgba(255,255,255,.18), inset 0 0 18px rgba(160,210,255,.08)}
+#sheen.off,#content.off{opacity:0}
+#sheen.glow{animation:glow 1.3s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:inset 0 -1px 0 rgba(255,255,255,.3),inset 0 0 16px color-mix(in srgb,var(--acc) 55%,transparent),0 0 14px color-mix(in srgb,var(--acc) 45%,transparent)}}
+
+#content{position:absolute;overflow:hidden}
+.layer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.layer.full{display:block}
+.layer.in{animation:fadeIn .32s var(--ease) both}
+.layer.in-r{animation:slideInR .42s var(--ease) .14s both}
+.layer.in-l{animation:slideInL .42s var(--ease) .14s both}
+.layer.out{animation:fadeOut .22s ease both;pointer-events:none}
+@keyframes fadeIn{from{opacity:0;filter:blur(3px)}to{opacity:1;filter:none}}
+@keyframes fadeOut{to{opacity:0;filter:blur(3px)}}
+@keyframes slideInR{from{opacity:0;transform:translateX(26px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes slideInL{from{opacity:0;transform:translateX(-26px) scale(.94)}to{opacity:1;transform:none}}
+
+.row{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;padding:0 4px}
+.digits{font-family:"Segoe UI Variable Display","Segoe UI",sans-serif;font-weight:700;font-size:21px;
+  letter-spacing:.4px;font-variant-numeric:tabular-nums;line-height:1}
+.digits.sm{font-size:16px}
+.lbl{font-size:12px;font-weight:600;color:var(--fg2)}
+.lbl.trunc{max-width:120px;overflow:hidden;text-overflow:ellipsis}
+.ic{font-size:15px;line-height:1;text-shadow:none}
+.hello{font-size:15px;font-weight:600;letter-spacing:.2px}
+.hello b{font-weight:700}
+.wave{font-size:19px;width:30px;height:30px;border-radius:15px;text-shadow:none;transition:transform .2s}
+.wave:hover{background:rgba(255,255,255,.14);transform:scale(1.12)}
+.waving .wave{animation:wave .7s ease-in-out}
+@keyframes wave{0%,100%{transform:rotate(0)}20%{transform:rotate(-22deg)}40%{transform:rotate(18deg)}60%{transform:rotate(-14deg)}80%{transform:rotate(10deg)}}
+
+/* handle (double vertical dots) */
+#handle{position:absolute;width:20px;height:30px;display:grid;place-items:center;border-radius:10px;
+  transition:left .56s var(--spring),top .56s var(--spring),opacity .25s,background .15s}
+#handle i{display:block;width:3.6px;height:3.6px;border-radius:2px;background:var(--fg2);box-shadow:0 0 3px rgba(0,0,0,.5)}
+#handle span{display:grid;gap:4px}
+#handle:hover{background:rgba(255,255,255,.14)}
+.hidden{opacity:0 !important;pointer-events:none !important}
+
+/* side arrows */
+.arrow{position:absolute;width:26px;height:26px;border-radius:13px;color:#fff;
+  background:radial-gradient(80% 80% at 30% 20%,rgba(255,255,255,.28),rgba(255,255,255,.04));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.38),0 2px 8px rgba(0,0,0,.25);
+  backdrop-filter:blur(2px);transition:opacity .25s,transform .2s;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
+.arrow svg{width:13px;height:13px}
+.arrow:hover{transform:scale(1.12)}
+
+/* full cards (2in x 1in) */
+.full{position:absolute;inset:0;padding:9px 12px;box-sizing:border-box}
+.ttl{font-size:9.5px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--fg3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-inline-end:16px}
+[dir=rtl] .ttl{letter-spacing:0;font-size:10.5px}
+.sub{font-size:11px;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hl{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bignum{font-family:"Segoe UI Variable Display","Segoe UI",sans-serif;font-weight:700;font-size:30px;line-height:1.05;font-variant-numeric:tabular-nums}
+.bignum small{font-size:14px;font-weight:600;color:var(--fg2);margin-inline-start:3px}
+.ib{position:absolute;width:20px;height:20px;border-radius:10px;color:var(--fg2)}
+.ib:hover{background:rgba(255,255,255,.16);color:#fff}
+.ib svg{width:13px;height:13px}
+.gear{inset-inline-end:6px;bottom:6px}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px 4px;margin-top:4px}
+.pgrid div{display:flex;flex-direction:column;align-items:center;font-size:8.5px;line-height:1.15;color:var(--fg2);padding:1px 2px;border-radius:6px}
+[dir=rtl] .pgrid div{font-size:9.5px}
+.pgrid div b{font-size:11.5px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+.pgrid div.nx{background:color-mix(in srgb,var(--acc) 22%,transparent);color:#fff}
+.calc{display:flex;align-items:center;gap:5px;margin-top:5px}
+.kin{all:unset;width:56px;padding:2px 6px;border-radius:7px;background:rgba(255,255,255,.12);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.25);font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;cursor:text;-webkit-user-select:text;user-select:text}
+.kin::placeholder{color:var(--fg3)}
+.sw{display:inline-flex;gap:3px;align-items:center;white-space:nowrap;font-size:10px;font-weight:700;padding:3px 6px;border-radius:7px;background:rgba(255,255,255,.12);box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
+.sw:hover{background:rgba(255,255,255,.22)}
+.res{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar{height:4px;border-radius:2px;background:rgba(255,255,255,.18);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),#fff);border-radius:2px}
+[dir=rtl] .bar i{background:linear-gradient(270deg,var(--acc),#fff)}
+.wx{display:flex;gap:10px;align-items:center}
+.wx .em{font-size:30px;text-shadow:none;line-height:1}
+.wx dl{margin:0;display:grid;grid-template-columns:auto auto;gap:1px 8px;font-size:10px;color:var(--fg2)}
+[dir=rtl] .wx{gap:7px}
+[dir=rtl] .wx dl{gap:0 5px}
+.wx dd{margin:0;color:#fff;font-weight:600;font-variant-numeric:tabular-nums}
+.list{display:grid;gap:2px;margin-top:4px}
+.list div{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:11px;color:var(--fg2);white-space:nowrap}
+.list div span:first-child{overflow:hidden;text-overflow:ellipsis}
+.list div b{color:#fff;font-weight:700;font-variant-numeric:tabular-nums}
+.list div i{font-style:normal;font-size:9.5px;color:var(--fg3);margin-inline-start:4px}
+
+/* onboarding */
+.onb .kin{width:118px;font-size:12.5px;padding:4px 8px}
+.onb .go{font-size:12px;padding:4px 10px;background:color-mix(in srgb,var(--acc) 35%,transparent)}
+.onb .lng{position:absolute;inset-inline-end:8px;top:6px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;background:rgba(255,255,255,.12)}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+
+/* media */
+.art{width:22px;height:22px;border-radius:6px;object-fit:cover;box-shadow:0 0 0 1px rgba(255,255,255,.25)}
+.art.ph{display:grid;place-items:center;background:rgba(255,255,255,.12);font-size:12px}
+.mt{max-width:118px;overflow:hidden;font-size:12px;font-weight:600;
+  -webkit-mask-image:linear-gradient(90deg,#000 85%,transparent)}
+.mt span{display:inline-block;white-space:nowrap}
+.mt.scroll span{animation:marq 9s linear infinite;padding-right:28px}
+@keyframes marq{0%,15%{transform:translateX(0)}85%,100%{transform:translateX(var(--mx))}}
+.cb{width:22px;height:22px;border-radius:11px;color:#fff}
+.cb:hover{background:rgba(255,255,255,.18)}
+.cb svg{width:12px;height:12px}
+.cb.pp svg{width:14px;height:14px}
+.mfull{display:flex;gap:9px}
+.mfull .art{width:50px;height:50px;border-radius:10px;flex:none}
+.mfull .info{min-width:0;flex:1}
+.mfull .t{font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctrl{display:flex;justify-content:center;gap:10px;margin-top:3px}
+.times{display:flex;justify-content:space-between;font-size:9px;color:var(--fg3);margin-top:2px;font-variant-numeric:tabular-nums}
+
+/* volume */
+.vol{display:inline-flex;align-items:center;gap:8px;padding:0 4px}
+.vol svg{width:16px;height:16px}
+.vtrack{width:96px;height:5px;border-radius:3px;background:rgba(255,255,255,.2);overflow:hidden}
+.vtrack i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,#c9eeff,#fff);transition:width .18s var(--ease)}
+.vnum{font-weight:700;font-size:13px;width:26px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* lyrics */
+#lyrics{position:absolute;overflow:hidden;transition:left .56s var(--spring),top .56s var(--spring),width .56s var(--spring),height .56s var(--spring),opacity .3s}
+#lyLines{position:absolute;inset:0;padding:6px 26px 6px 12px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:2px;text-align:center}
+#lyLines div{font-size:10.5px;color:var(--fg3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:all .3s}
+#lyLines div.cur{font-size:12.5px;font-weight:700;color:#fff}
+#lyrics.one #lyLines div:not(.cur){display:none}
+#lyrics.one #lyLines div.cur{font-size:11.5px}
+#pin{position:absolute;right:4px;top:4px;width:20px;height:20px;border-radius:10px;color:var(--fg3)}
+#pin svg{width:12px;height:12px}
+#pin:hover{background:rgba(255,255,255,.16);color:#fff}
+#pin.on{color:var(--acc2)}
+#lyrics.one #pin{top:50%;margin-top:-10px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="liquid" x="-10%" y="-20%" width="120%" height="160%" color-interpolation-filters="sRGB">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b"/>
+    <feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -10" result="g"/>
+    <feMorphology in="g" operator="erode" radius="1.2" result="er"/>
+    <feComposite in="g" in2="er" operator="out" result="ring"/>
+    <feFlood flood-color="#ffffff" flood-opacity=".55"/>
+    <feComposite in2="ring" operator="in" result="rim"/>
+    <feGaussianBlur in="g" stdDeviation="5" result="sb"/>
+    <feOffset in="sb" dy="3" result="so"/>
+    <feFlood flood-color="#000000" flood-opacity=".26"/>
+    <feComposite in2="so" operator="in" result="sh1"/>
+    <feComposite in="sh1" in2="g" operator="out" result="shadow"/>
+    <feComponentTransfer in="g" result="fill"><feFuncA id="tintA" type="linear" slope=".42"/></feComponentTransfer>
+    <feMerge><feMergeNode in="shadow"/><feMergeNode in="fill"/><feMergeNode in="rim"/></feMerge>
+  </filter>
+</svg>
+
+<div id="stage">
+  <div id="goo">
+    <div class="blob" id="bar"></div>
+    <div class="blob" id="main"></div>
+    <div class="blob" id="lyb"></div>
+    <div class="blob" id="bA"></div>
+    <div class="blob" id="bB"></div>
+  </div>
+  <div class="glassy" id="sheen"></div>
+  <div id="content"></div>
+  <button id="handle" class="hidden" data-hit data-act="toggle" title=""><span><i></i><i></i></span></button>
+  <button class="arrow hidden" id="aL" data-hit data-act="prev"></button>
+  <button class="arrow hidden" id="aR" data-hit data-act="next"></button>
+  <div id="lyrics" class="hidden"><div id="lyLines"></div><button id="pin" data-hit data-act="pin"></button></div>
+</div>
+
+<script src="common.js"></script>
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const host = window.chrome && window.chrome.webview;
+const post = m => { if (host) host.postMessage(m); };
+addEventListener('error', e => post({ t: 'log', m: `error ${e.message} @${e.lineno}:${e.colno}` }));
+addEventListener('unhandledrejection', e => post({ t: 'log', m: `reject ${e.reason && (e.reason.stack || e.reason)}` }));
+const lsGet = k => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+const IC = {
+  prev:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="2.8" height="14" rx="1.2"/><path d="M19.5 5.6v12.8a.8.8 0 0 1-1.2.7L8.6 12.7a.8.8 0 0 1 0-1.4l9.7-6.4a.8.8 0 0 1 1.2.7z"/></svg>',
+  next:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="16.2" y="5" width="2.8" height="14" rx="1.2"/><path d="M4.5 5.6v12.8a.8.8 0 0 0 1.2.7l9.7-6.4a.8.8 0 0 0 0-1.4L5.7 4.9a.8.8 0 0 0-1.2.7z"/></svg>',
+  play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.8v14.4a1 1 0 0 0 1.5.9l11.6-7.2a1 1 0 0 0 0-1.8L8.5 3.9A1 1 0 0 0 7 4.8z"/></svg>',
+  pause:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="5.5" y="4.5" width="4.6" height="15" rx="1.4"/><rect x="13.9" y="4.5" width="4.6" height="15" rx="1.4"/></svg>',
+  reset:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/></svg>',
+  skip:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 5.6v12.8a.8.8 0 0 0 1.2.7l8.3-6.4a.8.8 0 0 0 0-1.4L5.7 4.9a.8.8 0 0 0-1.2.7z"/><rect x="16" y="5" width="3" height="14" rx="1.2"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  chevL:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  chevR:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+  pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-3.5 4h11L14 9V3M12 13v8"/></svg>',
+  gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="3.3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>',
+  spk:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12.5 5v14l-5-4.5H4z" fill="currentColor"/><path d="M16 9a4 4 0 0 1 0 6M18.6 6.5a7.5 7.5 0 0 1 0 11"/></svg>',
+  mute:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12.5 5v14l-5-4.5H4z" fill="currentColor"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg>',
+  swap:'<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:-1px"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/></svg>',
+};
+$('#aL').innerHTML = IC.chevL; $('#aR').innerHTML = IC.chevR; $('#pin').innerHTML = IC.pin;
+const gearBtn = (section = '') => `<button class="ib gear" data-hit data-act="settings" data-section="${section}" title="${t('settings')}">${IC.gear}</button>`;
+
+/* ------------------------------------------------------------------ state */
+let cfg = merge(DEFAULTS, {});
+const S = {
+  mode: 'boot',              // boot | onboard | hello | compact | full
+  card: 'clock',
+  autoFrom: null,            // card to return to after an automatic switch
+  overlay: null, overlayUntil: 0, alert: null,
+  fullUntil: 0, hover: false, hit: false, inputFocus: false,
+  loc: null, prayer: null, weather: null, fx: null,
+  meet: { events: [], configured: 0, errors: 0 }, meetShown: '',
+  media: { has: false }, mediaKey: '', lastPlaying: 0,
+  vol: null,
+  fxAmt: 100, fxRev: false, nameDraft: '',
+  iqama: null, fired: new Set(),
+  compactW: 150,
+};
+const CH = 34, HH = 40, FULL = { w: 192, h: 96, top: 16 }, ONB = { w: 244, h: 92, top: 12 };
+
+/* ------------------------------------------------------------------ host bridge */
+const pending = new Map(); let fid = 0;
+function hfetch(url) {
+  if (!host) return fetch(url).then(async r => ({ ok: r.ok, body: await r.text() })).catch(() => ({ ok: false, body: '' }));
+  return new Promise(res => {
+    const id = ++fid; pending.set(id, res); post({ t: 'fetch', id, url });
+    setTimeout(() => { if (pending.has(id)) { pending.delete(id); res({ ok: false, body: '' }); } }, 25000);
+  });
+}
+async function hjson(url) { const r = await hfetch(url); if (!r.ok) return null; try { return JSON.parse(r.body); } catch { return null; } }
+
+if (host) host.addEventListener('message', e => {
+  const m = e.data; if (!m) return;
+  switch (m.t) {
+    case 'fetch': { const r = pending.get(m.id); if (r) { pending.delete(m.id); r(m); } break; }
+    case 'cursor': onCursor(m.x, m.y, m.inside); break;
+    case 'vol': onVol(m); break;
+    case 'media': onMedia(m); break;
+    case 'meet': S.meet = m; render(); break;
+    case 'settings': onSettings(m.data || {}); break;
+  }
+});
+
+function applyLook() {
+  LANG = cfg.lang === 'ar' ? 'ar' : 'en';
+  document.documentElement.lang = LANG;
+  document.getElementById('tintA').setAttribute('slope', String(Math.max(0, cfg.tint) / 100));
+  const r = document.documentElement.style;
+  r.setProperty('--acc', cfg.accent); r.setProperty('--glass', cfg.glass);
+}
+function onSettings(data) {
+  const prev = cfg;
+  cfg = merge(DEFAULTS, data);
+  applyLook();
+  if (S.mode === 'boot') { start(); return; }
+  const ch = k => JSON.stringify(getPath(prev, k)) !== JSON.stringify(getPath(cfg, k));
+  if (ch('location')) refreshLocation();
+  else if (ch('prayer.method') || ch('prayer.school') || ch('prayer.tune')) loadPrayer();
+  if (ch('fx')) { S.fx = null; loadFx(); }
+  if (ch('focus') && !F.running) F.remain = null;
+  if (!cards().includes(S.card)) { S.card = 'clock'; S.autoFrom = null; }
+  render(true);
+}
+
+/* ------------------------------------------------------------------ geometry */
+const W = () => innerWidth;
+const CX = () => cfg.position === 'left' ? 132 : cfg.position === 'right' ? innerWidth - 132 : innerWidth / 2;
+function visRect() {
+  if (S.mode === 'full') return { x: CX() - FULL.w / 2, y: FULL.top, w: FULL.w, h: FULL.h, r: 22 };
+  if (S.mode === 'onboard') return { x: CX() - ONB.w / 2, y: ONB.top, w: ONB.w, h: ONB.h, r: 24 };
+  const h = S.mode === 'hello' ? HH : CH, w = S.compactW;
+  return { x: CX() - w / 2, y: 0, w, h, r: h / 2 };
+}
+function css(el, r, ext = 0) {
+  el.style.left = r.x + 'px'; el.style.top = (r.y - ext) + 'px';
+  el.style.width = r.w + 'px'; el.style.height = (r.h + ext) + 'px';
+  el.style.borderRadius = r.r + 'px';
+}
+const circ = (cx, cy, d) => ({ x: cx - d / 2, y: cy - d / 2, w: d, h: d, r: d / 2 });
+const kf = r => ({ left: r.x + 'px', top: r.y + 'px', width: r.w + 'px', height: r.h + 'px', borderRadius: r.r + 'px' });
+
+function lyricsVisible() {
+  if (!S.media.has || !LY.status || S.mode === 'hello' || S.mode === 'boot' || S.mode === 'onboard' || S.alert) return false;
+  if (S.mode === 'full' && S.card === 'media' && S.hover) return true;
+  return cfg.pinned && S.media.playing && (LY.status === 'synced');
+}
+
+function layout() {
+  const R = visRect(), compact = S.mode !== 'full' && S.mode !== 'onboard';
+  const M = $('#main'), bar = $('#bar');
+  $('#stage').style.setProperty('--ox', CX() + 'px');
+  if (!animating) css(M, R, compact ? 22 : 0);
+  // a bezel lip glued to the top edge: the goo turns it into a notch with concave corners
+  const bw = compact ? R.w + 16 : 46;
+  css(bar, { x: CX() - bw / 2, y: -12, w: bw, h: 14, r: 0 });
+  css($('#sheen'), R); css($('#content'), R);
+  $('#sheen').classList.toggle('glow', !!S.alert);
+  const hd = $('#handle');
+  hd.classList.toggle('hidden', !(S.mode === 'compact' || S.mode === 'full'));
+  if (compact) { hd.style.left = (R.x + R.w - 25) + 'px'; hd.style.top = (R.y + (R.h - 30) / 2) + 'px'; }
+  else { hd.style.left = (isAr() ? R.x + 3 : R.x + R.w - 23) + 'px'; hd.style.top = (R.y + 3) + 'px'; }
+  const showArrows = S.mode === 'full' && !animating;
+  $('#aL').classList.toggle('hidden', !showArrows); $('#aR').classList.toggle('hidden', !showArrows);
+  $('#aL').style.left = (R.x - 34) + 'px'; $('#aR').style.left = (R.x + R.w + 8) + 'px';
+  $('#aL').style.top = $('#aR').style.top = (R.y + R.h / 2 - 13) + 'px';
+  // lyrics drip
+  const ly = $('#lyrics'), lyb = $('#lyb'), vis = lyricsVisible();
+  let LR;
+  if (S.mode === 'full') LR = { x: CX() - 125, y: R.y + R.h + 12, w: 250, h: 62, r: 18 };
+  else LR = { x: CX() - Math.max(R.w, 210) / 2, y: R.y + R.h + 9, w: Math.max(R.w, 210), h: 24, r: 12 };
+  ly.classList.toggle('one', S.mode !== 'full');
+  ly.classList.toggle('hidden', !vis);
+  css(ly, LR);
+  if (vis) { css(lyb, LR); lyb.style.opacity = 1; }
+  else { css(lyb, { x: CX() - 15, y: R.y + R.h - 26, w: 30, h: 24, r: 12 }); lyb.style.opacity = 0; }
+}
+
+/* ------------------------------------------------------------------ content */
+let curLayer = null, curKey = '';
+function view() {
+  if (S.mode === 'onboard') return { key: 'onboard:' + LANG, full: true, html: onboardHTML() };
+  if (S.mode === 'hello') return { key: 'hello', full: false, html: helloHTML() };
+  if (S.mode === 'compact' && S.overlay === 'volume') return { key: 'vol', full: false, ltr: true, html: volHTML() };
+  if (S.mode === 'compact' && S.alert) return { key: 'alert:' + S.alert.id, full: false, html: alertHTML() };
+  const full = S.mode === 'full';
+  const fn = (full ? FULLV : COMPV)[S.card] || COMPV.clock;
+  return { key: S.mode + ':' + S.card, full, ltr: S.card === 'media' && !full, html: fn() };
+}
+function swapLayer(v, cls = 'in') {
+  if (curLayer) { const old = curLayer; old.className += ' out'; setTimeout(() => old.remove(), 260); }
+  const el = document.createElement('div');
+  el.className = 'layer ' + (v.full ? 'full ' : '') + cls;
+  el.dir = v.ltr ? 'ltr' : (isAr() ? 'rtl' : 'ltr');
+  el.innerHTML = v.html; el._html = v.html;
+  $('#content').appendChild(el);
+  curLayer = el;
+}
+function measure() {
+  if (S.mode === 'full' || S.mode === 'onboard' || !curLayer) return;
+  const row = curLayer.firstElementChild; if (!row) return;
+  const extra = S.mode === 'compact' ? 30 : 14;
+  S.compactW = Math.max(S.mode === 'hello' ? 120 : 92, Math.min(320, Math.ceil(row.offsetWidth) + 16 + extra));
+  // content area excludes the handle on the right
+  curLayer.style.right = S.mode === 'compact' ? '22px' : '0';
+  curLayer.style.left = S.mode === 'compact' ? '6px' : '0';
+}
+function render(force, cls) {
+  if (S.mode === 'boot') return;
+  const v = view();
+  if (force || v.key !== curKey || !curLayer) {
+    if (curLayer && curLayer.contains(document.activeElement) && v.key === curKey) { /* keep the field being typed in */ }
+    else { swapLayer(v, cls || 'in'); curKey = v.key; }
+  }
+  else if (v.html !== curLayer._html && !curLayer.contains(document.activeElement)) { curLayer.innerHTML = v.html; curLayer._html = v.html; }
+  setupMarquee();
+  measure();
+  layout();
+  renderLyrics();
+}
+function setupMarquee() {
+  if (!curLayer) return;
+  curLayer.querySelectorAll('.mt').forEach(mt => {
+    const sp = mt.firstElementChild; const over = sp.scrollWidth - mt.clientWidth;
+    mt.classList.toggle('scroll', over > 2); if (over > 2) sp.style.setProperty('--mx', -(over + 28) + 'px');
+  });
+}
+
+/* ------------------------------------------------------------------ time helpers */
+function fmt(d, sec, ampm) {
+  let h = d.getHours(); const suf = h >= 12 ? t('pm') : t('am');
+  if (!cfg.use24h) h = h % 12 || 12;
+  let s = (cfg.use24h ? pad(h) : h) + ':' + pad(d.getMinutes()) + (sec ? ':' + pad(d.getSeconds()) : '');
+  return ampm && !cfg.use24h ? s + ' ' + suf : s;
+}
+function dur(ms) {
+  ms = Math.max(0, ms); const s0 = Math.floor(ms / 1000), h = Math.floor(s0 / 3600), m = Math.floor(s0 % 3600 / 60), s = s0 % 60;
+  return h ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+}
+const mmss = s => { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ':' + pad(s % 60); };
+const sod = x => { const d = new Date(x); d.setHours(0, 0, 0, 0); return +d; };
+
+/* ------------------------------------------------------------------ data: location, prayer, weather, fx */
+async function getLoc() {
+  const c = lsGet('loc');
+  if (c && Date.now() - c.t < 6 * 3600e3) return c;
+  let loc = null;
+  let j = await hjson('https://ipwho.is/');
+  if (j && j.success !== false && j.latitude != null) loc = { lat: j.latitude, lon: j.longitude, city: j.city, cc: j.country_code, t: Date.now() };
+  if (!loc) { j = await hjson('https://ipapi.co/json/'); if (j && j.latitude != null) loc = { lat: j.latitude, lon: j.longitude, city: j.city, cc: j.country_code, t: Date.now() }; }
+  if (!loc) loc = c || { lat: 24.7136, lon: 46.6753, city: 'Riyadh', cc: 'SA', t: 0 };
+  lsSet('loc', loc);
+  return loc;
+}
+async function resolveLoc() {
+  const L = cfg.location;
+  if (L.mode === 'manual' && L.lat != null && L.lon != null) return { lat: +L.lat, lon: +L.lon, city: L.city, cc: L.cc || '' };
+  return getLoc();
+}
+async function refreshLocation() {
+  S.loc = await resolveLoc();
+  S.prayer = null; S.weather = null;
+  loadPrayer(); loadWeather(); render();
+}
+const dayStr = d => `${pad(d.getDate())}-${pad(d.getMonth() + 1)}-${d.getFullYear()}`;
+function prayerKey(ds) {
+  const p = cfg.prayer, tu = p.tune;
+  return [ds, S.loc.lat.toFixed(3), S.loc.lon.toFixed(3), methodFor(cfg, S.loc.cc), p.school, PRAYERS.map(k => tu[k] || 0).join(',')].join('|');
+}
+async function loadPrayer() {
+  if (!S.loc) return;
+  const ds = dayStr(new Date()), key = prayerKey(ds), p = cfg.prayer, tu = p.tune;
+  const tune = [0, tu.Fajr, tu.Sunrise, tu.Dhuhr, tu.Asr, tu.Maghrib, 0, tu.Isha, 0].map(x => +x || 0).join(',');
+  const j = await hjson(`https://api.aladhan.com/v1/timings/${ds}?latitude=${S.loc.lat}&longitude=${S.loc.lon}` +
+    `&method=${methodFor(cfg, S.loc.cc)}&school=${+p.school ? 1 : 0}&tune=${tune}`);
+  if (j && j.data && j.data.timings) { S.prayer = { day: ds, key, t: j.data.timings }; lsSet('prayer', S.prayer); render(); }
+}
+function prayerAt(name, base, addDays = 0) {
+  const m = /(\d{1,2}):(\d{2})/.exec((S.prayer && S.prayer.t[name]) || ''); if (!m) return null;
+  const d = new Date(base); d.setDate(d.getDate() + addDays); d.setHours(+m[1], +m[2], 0, 0); return d;
+}
+function nextPrayer() {
+  if (!S.prayer) return null;
+  const now = new Date();
+  for (const p of SALAH) { const at = prayerAt(p, now); if (at && at > now) return { name: p, at }; }
+  const at = prayerAt('Fajr', now, 1); return at ? { name: 'Fajr', at } : null;
+}
+async function loadWeather() {
+  if (!S.loc) return;
+  const j = await hjson(`https://api.open-meteo.com/v1/forecast?latitude=${S.loc.lat}&longitude=${S.loc.lon}` +
+    `&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,is_day` +
+    `&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1`);
+  if (j && j.current) { S.weather = { c: j.current, max: j.daily?.temperature_2m_max?.[0], min: j.daily?.temperature_2m_min?.[0], t: Date.now() }; lsSet('weather', S.weather); render(); }
+}
+function wxInfo(code, day) {
+  const c = +code;
+  if (c === 0) return [day ? '☀️' : '🌙', t('wx0')];
+  if (c <= 2) return [day ? '🌤️' : '☁️', t('wx1')];
+  if (c === 3) return ['☁️', t('wx2')];
+  if (c <= 48) return ['🌫️', t('wx3')];
+  if (c <= 57) return ['🌦️', t('wx4')];
+  if (c <= 67) return ['🌧️', t('wx5')];
+  if (c <= 77) return ['❄️', t('wx6')];
+  if (c <= 82) return ['🌧️', t('wx7')];
+  if (c <= 86) return ['🌨️', t('wx8')];
+  return ['⛈️', t('wx9')];
+}
+async function loadFx() {
+  const { base, quote } = cfg.fx;
+  const j = await hjson(`https://open.er-api.com/v6/latest/${encodeURIComponent(base)}`);
+  if (j && j.rates && j.rates[quote] && cfg.fx.base === base && cfg.fx.quote === quote) {
+    S.fx = { base, quote, r: j.rates[quote], upd: j.time_last_update_unix * 1000 }; lsSet('fx2', S.fx); render();
+  }
+}
+const fxDig = r => r >= 100 ? 2 : r >= 1 ? 4 : 5;
+function fxCalc() {
+  const f = S.fx, amt = +S.fxAmt || 0;
+  return S.fxRev ? { res: amt / f.r, from: f.quote, to: f.base } : { res: amt * f.r, from: f.base, to: f.quote };
+}
+
+/* ------------------------------------------------------------------ ramadan */
+function ramadanInfo() {
+  if (cfg.ramadan === 'off' || !S.prayer) return null;
+  const now = new Date(), forced = cfg.ramadan === 'on';
+  const h0 = hijriParts(now, cfg.hijri), h1 = hijriParts(shiftDays(now, 1), cfg.hijri);
+  if (!h0 || !h1) return null;
+  const todayR = forced || h0.m === 9, tomorrowR = forced || h1.m === 9;
+  const fajr = prayerAt('Fajr', now), maghrib = prayerAt('Maghrib', now);
+  if (!fajr || !maghrib) return null;
+  if (todayR && now < fajr) return { phase: 'suhoor', at: fajr, day: h0.d, from: null };
+  if (todayR && now < maghrib) return { phase: 'iftar', at: maghrib, day: h0.d, from: fajr };
+  if (tomorrowR && now >= maghrib) return { phase: 'suhoor', at: prayerAt('Fajr', now, 1), day: h1.m === 9 ? h1.d : h0.d + 1, from: null };
+  return null;
+}
+
+/* ------------------------------------------------------------------ focus timer */
+const F = Object.assign({ phase: 'work', running: false, endAt: 0, remain: null, done: 0, day: '' }, lsGet('focus') || {});
+const fSave = () => lsSet('focus', F);
+const fLen = ph => (ph === 'work' ? cfg.focus.work : ph === 'long' ? cfg.focus.longBrk : cfg.focus.brk) * 60e3;
+const fRemain = () => F.running ? Math.max(0, F.endAt - Date.now()) : (F.remain ?? fLen(F.phase));
+function fStart() { F.endAt = Date.now() + fRemain(); F.running = true; F.remain = null; fSave(); }
+function fPause() { F.remain = fRemain(); F.running = false; fSave(); }
+function fReset() { F.running = false; F.remain = null; F.phase = 'work'; fSave(); }
+function fFinish(skipped) {
+  if (F.phase === 'work') {
+    if (!skipped) F.done++;
+    F.phase = F.done > 0 && F.done % Math.max(1, cfg.focus.every) === 0 && !skipped ? 'long' : 'break';
+    F.remain = null; F.endAt = Date.now() + fLen(F.phase); F.running = true;
+    if (!skipped) raiseAlert({ id: 'f' + Date.now(), icon: '☕', title: t('takeBreak'), sound: cfg.focus.sound ? 'focus' : null, ms: 12000 });
+  } else {
+    F.phase = 'work'; F.running = false; F.remain = null;
+    if (!skipped) raiseAlert({ id: 'f' + Date.now(), icon: '🎯', title: t('timeToFocus'), sound: cfg.focus.sound ? 'focus' : null, ms: 12000 });
+  }
+  fSave();
+}
+const fIcon = () => F.phase === 'work' ? '🎯' : '☕';
+const fName = () => F.phase === 'work' ? t('focus') : F.phase === 'long' ? t('longBrk') : t('brk');
+
+/* ------------------------------------------------------------------ world clock + events */
+function tzFmt(tz, d, opts) { try { return new Intl.DateTimeFormat(isAr() ? 'ar-u-nu-latn' : 'en-GB', { timeZone: tz, ...opts }).format(d); } catch { return '--'; } }
+function tzOffsetMin(tz, d) {
+  try {
+    const p = new Intl.DateTimeFormat('en-US', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' }).formatToParts(d);
+    const g = k => +p.find(x => x.type === k).value;
+    return Math.round((Date.UTC(g('year'), g('month') - 1, g('day'), g('hour'), g('minute')) - (Math.floor(+d / 60000) * 60000)) / 60000);
+  } catch { return 0; }
+}
+const tzLabel = z => z.label || (z.tz.split('/').pop() || z.tz).replace(/_/g, ' ');
+function tzRow(z, now) {
+  const time = tzFmt(z.tz, now, { hour: 'numeric', minute: '2-digit', hour12: !cfg.use24h });
+  const rel = tzOffsetMin(z.tz, now) + now.getTimezoneOffset();
+  const local = new Date(+now + rel * 60000);
+  const dd = Math.round((sod(local) - sod(now)) / 86400e3);
+  const hh = Math.trunc(rel / 60), mm = Math.abs(rel % 60);
+  const off = rel === 0 ? '±0' : (rel > 0 ? '+' : '−') + Math.abs(hh) + (mm ? ':' + pad(mm) : '') + t('hShort');
+  return { time, off, day: dd > 0 ? t('tomorrow') : dd < 0 ? t('yesterday') : '' };
+}
+function eventList() {
+  const now = Date.now(), list = [];
+  for (const e of cfg.events) {
+    if (!e || !e.date) continue;
+    const [y, m, d] = e.date.split('-').map(Number); if (!y) continue;
+    const mk = yr => { const a = new Date(yr, m - 1, d); if (e.time) { const [hh, mi] = e.time.split(':').map(Number); a.setHours(hh || 0, mi || 0); } return a; };
+    let at = mk(y);
+    if (e.yearly) { const yr = new Date().getFullYear(); at = mk(yr); if ((e.time ? +at < now - 3600e3 : sod(at) < sod(now))) at = mk(yr + 1); }
+    list.push({ title: e.title || '—', emoji: e.emoji || '📅', at: +at, allDay: !e.time, user: true });
+  }
+  if (cfg.islamicEvents) for (const o of islamicOccasions(cfg.hijri)) list.push({ title: t(o.k), emoji: o.emoji, at: o.at, allDay: true });
+  return list.filter(e => e.allDay ? e.at >= sod(now) : e.at > now - 3600e3).sort((a, b) => a.at - b.at);
+}
+function evWhen(e, short) {
+  const now = Date.now();
+  if (!e.allDay) { const ms = e.at - now; if (ms <= 0) return t('eventNow'); if (ms < 86400e3) return dur(ms); }
+  const days = Math.round((sod(e.at) - sod(now)) / 86400e3);
+  if (days <= 0) return t('todayCap');
+  if (days === 1) return t('tomorrow');
+  return short ? days + t('dShort') : daysText(days);
+}
+
+/* ------------------------------------------------------------------ meet */
+function meetState() {
+  const now = Date.now(), ev = (S.meet.events || []).slice().sort((a, b) => a.start - b.start);
+  const active = ev.find(e => e.start <= now && now < e.end);
+  const next = ev.find(e => e.start > now);
+  const today = ev.filter(e => new Date(e.start).toDateString() === new Date().toDateString() || (e.start <= now && now < e.end));
+  return { active, next, today };
+}
+
+/* ------------------------------------------------------------------ lyrics (LRCLIB) */
+const LY = { key: '', status: '', lines: [], plain: [] };
+function cleanMeta(m) {
+  let ti = m.title || '', a = (m.artist || '').replace(/\s*-\s*Topic$/i, '').replace(/VEVO$/i, '').trim();
+  const isSpotify = /spotify/i.test(m.app || '');
+  if (!isSpotify && ti.includes(' - ')) { const [x, ...y] = ti.split(' - '); a = x.trim(); ti = y.join(' - '); }
+  ti = ti.replace(/\s*[\(\[][^\)\]]*(official|lyric|video|audio|visuali[sz]er|\bmv\b|\bhd\b|4k|remaster|live)[^\)\]]*[\)\]]/gi, '')
+       .replace(/\s*\|.*$/, '').replace(/\s*-\s*(remaster(ed)?|single|radio edit).*$/i, '').trim();
+  return { title: ti, artist: a };
+}
+function parseLrc(txt) {
+  const out = [];
+  for (const line of txt.split(/\r?\n/)) {
+    const stamps = [...line.matchAll(/\[(\d+):(\d+(?:\.\d+)?)\]/g)];
+    const text = line.replace(/\[[^\]]*\]/g, '').trim();
+    for (const s of stamps) out.push({ t: +s[1] * 60 + +s[2], text });
+  }
+  return out.sort((a, b) => a.t - b.t);
+}
+async function loadLyrics(m) {
+  const key = m.title + '|' + m.artist; if (key === LY.key) return;
+  LY.key = key; LY.status = 'loading'; LY.lines = []; LY.plain = [];
+  const { title, artist } = cleanMeta(m), e = encodeURIComponent;
+  const pick = list => {
+    if (!Array.isArray(list) || !list.length) return null;
+    const syn = list.filter(x => x.syncedLyrics);
+    const pool = syn.length ? syn : list;
+    if (m.dur > 0) pool.sort((a, b) => Math.abs((a.duration || 0) - m.dur) - Math.abs((b.duration || 0) - m.dur));
+    return pool[0];
+  };
+  let r = null;
+  try {
+    if (artist) r = pick(await hjson(`https://lrclib.net/api/search?track_name=${e(title)}&artist_name=${e(artist)}`));
+    if (!r || !r.syncedLyrics) { const r2 = pick(await hjson(`https://lrclib.net/api/search?q=${e((title + ' ' + artist).trim())}`)); if (r2 && (r2.syncedLyrics || !r)) r = r2; }
+  } catch {}
+  if (LY.key !== key) return;
+  if (r && r.syncedLyrics) { LY.lines = parseLrc(r.syncedLyrics); LY.status = 'synced'; }
+  else if (r && r.plainLyrics) { LY.plain = r.plainLyrics.split(/\r?\n/).filter(Boolean); LY.status = 'plain'; }
+  else LY.status = 'none';
+  render();
+}
+function mediaPos() {
+  const m = S.media; if (!m.has) return 0;
+  let p = m.pos + (m.playing ? (Date.now() - m.upd) / 1000 : 0);
+  if (!(p >= 0)) p = 0; if (m.dur > 0) p = Math.min(p, m.dur); return p;
+}
+let lyLast = '';
+function renderLyrics() {
+  if (!lyricsVisible()) return;
+  let lines;
+  if (LY.status === 'synced') {
+    const p = mediaPos() + 0.25; let i = -1;
+    for (let k = 0; k < LY.lines.length; k++) { if (LY.lines[k].t <= p) i = k; else break; }
+    const L = k => (LY.lines[k] && LY.lines[k].text) || (k >= 0 && k < LY.lines.length ? '♪' : '');
+    lines = [L(i - 1), i >= 0 ? (L(i) || '♪') : '♪', L(i + 1)];
+  } else if (LY.status === 'plain') lines = ['', t('noSynced'), LY.plain.slice(0, 1).join('')];
+  else if (LY.status === 'loading') lines = ['', t('lookingLyrics'), ''];
+  else lines = ['', t('noLyrics'), ''];
+  const html = `<div dir="auto">${esc(lines[0])}</div><div dir="auto" class="cur">${esc(lines[1])}</div><div dir="auto">${esc(lines[2])}</div>`;
+  if (html !== lyLast) { $('#lyLines').innerHTML = html; lyLast = html; }
+  $('#pin').classList.toggle('on', !!cfg.pinned);
+  $('#pin').title = cfg.pinned ? t('unpin') : t('pin');
+}
+
+/* ------------------------------------------------------------------ views */
+function onboardHTML() {
+  return `<div class="full onb"><div class="ttl" style="padding-inline-end:70px">${esc(t('welcome'))}</div>` +
+    `<div class="hl" style="margin-top:6px">${t('askName')}</div>` +
+    `<div class="calc" style="margin-top:8px"><input id="nameIn" class="kin" data-hit maxlength="24" placeholder="${t('namePh')}" value="${esc(S.nameDraft)}">` +
+    `<button class="sw go" data-hit data-act="onb-go">${t('go')}</button></div>` +
+    `<button class="lng" data-hit data-act="onb-lang">${isAr() ? 'English' : 'العربية'}</button></div>`;
+}
+function helloHTML() {
+  return `<div class="row"><span class="hello">${t('hello')} <b>${esc(cfg.name)}</b></span>` +
+         `<button class="wave" data-hit data-act="wave" title="${t('waveBack')}">👋</button></div>`;
+}
+function volHTML() {
+  const v = S.vol || { v: 0, muted: false };
+  return `<div class="vol">${v.muted || v.v === 0 ? IC.mute : IC.spk}<div class="vtrack"><i style="width:${v.muted ? 0 : v.v}%"></i></div><span class="vnum">${v.muted ? '—' : v.v}</span></div>`;
+}
+function alertHTML() {
+  const a = S.alert;
+  return `<div class="row"><span class="ic">${a.icon}</span><span class="lbl" style="color:#fff">${esc(a.title)}</span>` +
+    (a.big ? `<span class="digits sm">${esc(a.big)}</span>` : '') +
+    `<button class="cb" data-hit data-act="alert-x" title="${t('stop')}">${IC.x}</button></div>`;
+}
+const loadingRow = l => `<div class="row"><span class="lbl">${l}…</span></div>`;
+const loadingFull = ti => `<div class="full"><div class="ttl">${ti}</div><div class="sub" style="margin-top:20px">${t('loading')}…</div></div>`;
+function artHTML(cls = 'art') { return S.media.art ? `<img class="${cls}" src="${S.media.art}">` : `<div class="${cls} ph">♪</div>`; }
+
+function prayerCompact() {
+  const now = Date.now();
+  if (S.iqama && now < S.iqama.at) return `<div class="row"><span class="ic">🕌</span><span class="lbl">${t('iqamaIn')}</span><span class="digits sm">${dur(S.iqama.at - now)}</span></div>`;
+  const n = nextPrayer(); if (!n) return loadingRow(t('prayer'));
+  const ms = n.at - now, rm = cfg.prayer.remindMin * 60e3;
+  if (rm > 0 && ms <= rm) return `<div class="row"><span class="ic">🕌</span><span class="lbl">${t(n.name)} ${t('in')}</span><span class="digits sm">${dur(ms)}</span></div>`;
+  return `<div class="row"><span class="ic">🕌</span><span class="lbl">${t(n.name)}</span><span class="digits sm">${fmt(n.at, false, true)}</span></div>`;
+}
+
+const COMPV = {
+  clock: () => `<div class="row"><span class="digits">${fmt(new Date(), cfg.showSeconds)}</span></div>`,
+  hijri: () => `<div class="row"><span class="ic">🌙</span><span class="lbl" style="color:#fff">${esc(hijriText(new Date(), cfg.hijri, 'short'))}</span></div>`,
+  prayer: prayerCompact,
+  ramadan: () => {
+    const r = ramadanInfo(); if (!r) return COMPV.clock();
+    return `<div class="row"><span class="ic">${r.phase === 'iftar' ? '🌙' : '🍽️'}</span><span class="lbl">${t(r.phase === 'iftar' ? 'iftarIn' : 'suhoorIn')}</span><span class="digits sm">${dur(r.at - Date.now())}</span></div>`;
+  },
+  fx: () => S.fx ? `<div class="row"><span class="lbl">${S.fx.base}</span><span class="digits sm">1 = ${S.fx.r.toFixed(fxDig(S.fx.r))}</span><span class="lbl">${S.fx.quote}</span></div>` : loadingRow(t('rate')),
+  weather: () => {
+    if (!S.weather) return loadingRow(t('weather'));
+    const [em] = wxInfo(S.weather.c.weather_code, S.weather.c.is_day);
+    return `<div class="row"><span class="ic">${em}</span><span class="digits sm">${Math.round(S.weather.c.temperature_2m)}°C</span></div>`;
+  },
+  world: () => {
+    const z = cfg.world[0]; if (!z) return COMPV.clock();
+    const r = tzRow(z, new Date());
+    return `<div class="row"><span class="ic">🌍</span><span class="lbl trunc">${esc(tzLabel(z))}</span><span class="digits sm">${r.time}</span></div>`;
+  },
+  events: () => {
+    const e = eventList()[0];
+    if (!e) return `<div class="row"><span class="ic">📅</span><span class="lbl">${t('events')}</span></div>`;
+    return `<div class="row"><span class="ic">${e.emoji}</span><span class="lbl trunc">${esc(e.title)}</span><span class="digits sm">${evWhen(e, true)}</span></div>`;
+  },
+  focus: () => `<div class="row"><span class="ic">${F.running ? fIcon() : '⏸️'}</span><span class="digits sm">${dur(fRemain())}</span>${F.running ? '' : `<span class="lbl">${fName()}</span>`}</div>`,
+  meet: () => {
+    const { active, next } = meetState(), now = Date.now();
+    if (active) return `<div class="row"><span class="ic">⏱️</span><span class="digits sm">${dur(active.end - now)}</span><span class="lbl">${t('left')}</span></div>`;
+    if (next && new Date(next.start).toDateString() === new Date().toDateString())
+      return `<div class="row"><span class="lbl">${t('meetIn')}</span><span class="digits sm">${dur(next.start - now)}</span></div>`;
+    return `<div class="row"><span class="lbl">${t('noMeet')}</span></div>`;
+  },
+  media: () => {
+    const m = S.media;
+    return `<div class="row">${artHTML()}<div class="mt"><span dir="auto">${esc(m.title)}${m.artist ? ' · ' + esc(m.artist) : ''}</span></div>` +
+      `<button class="cb" data-hit data-act="m-prev">${IC.prev}</button>` +
+      `<button class="cb pp" data-hit data-act="m-toggle">${m.playing ? IC.pause : IC.play}</button>` +
+      `<button class="cb" data-hit data-act="m-next">${IC.next}</button></div>`;
+  },
+};
+
+const FULLV = {
+  clock: () => {
+    const d = new Date(), h = d.getHours();
+    const date = d.toLocaleDateString(gregLocale(), { weekday: 'long', day: 'numeric', month: 'long' });
+    return `<div class="full"><div class="ttl">${esc(S.loc?.city || t('localTime'))}</div>` +
+      `<div class="bignum"><span style="direction:ltr;unicode-bidi:isolate">${fmt(d, false)}<small>${cfg.showSeconds ? ':' + pad(d.getSeconds()) : ''}</small></span>${cfg.use24h ? '' : `<small>${h >= 12 ? t('pm') : t('am')}</small>`}</div>` +
+      `<div class="sub">${date}</div><div class="sub">${esc(hijriText(d, cfg.hijri))}</div>` + gearBtn() + `</div>`;
+  },
+  hijri: () => {
+    const d = new Date(), occ = cfg.islamicEvents ? null : null;
+    const nextOcc = islamicOccasions(cfg.hijri).find(o => o.at >= sod(d));
+    return `<div class="full"><div class="ttl">${t('hijri')}</div>` +
+      `<div class="hl" style="font-size:19px;margin-top:2px">${esc(hijriText(d, cfg.hijri, 'short'))}</div>` +
+      `<div class="sub">${esc(hijriText(d, cfg.hijri, 'weekday'))}</div>` +
+      `<div class="sub">${d.toLocaleDateString(gregLocale(), { day: 'numeric', month: 'long', year: 'numeric' })}</div>` +
+      (nextOcc ? `<div class="sub" style="color:var(--acc)">${nextOcc.emoji} ${t(nextOcc.k)} · ${evWhen({ ...nextOcc }, false)}</div>` : '') +
+      gearBtn('hijri') + `</div>`;
+  },
+  prayer: () => {
+    if (!S.prayer) return loadingFull(t('prayerTimes'));
+    const n = nextPrayer(), now = new Date();
+    const cells = PRAYERS.map(p => { const at = prayerAt(p, now); return `<div class="${n && n.name === p ? 'nx' : ''}">${t(p)}<b>${at ? fmt(at, false) : '--'}</b></div>`; }).join('');
+    const iq = S.iqama && +now < S.iqama.at;
+    const line = iq ? `<span style="font-size:15px;font-weight:700">${t('iqama')}</span><span class="sub" style="font-size:10.5px">${t(S.iqama.name)} · ${t('in')} ${dur(S.iqama.at - now)}</span>`
+      : `<span style="font-size:15px;font-weight:700">${n ? t(n.name) : ''}</span><span class="sub" style="font-size:10.5px">${n ? fmt(n.at, false, true) + ' · ' + t('in') + ' ' + dur(n.at - now) : ''}</span>`;
+    return `<div class="full" style="padding-top:7px"><div class="ttl">${t('prayer')} · ${esc(S.loc?.city || '')}</div>` +
+      `<div style="display:flex;align-items:baseline;gap:6px;white-space:nowrap">${line}</div>` +
+      `<div class="pgrid">${cells}</div></div>`;
+  },
+  ramadan: () => {
+    const r = ramadanInfo(); if (!r) return FULLV.clock();
+    const now = Date.now(), pct = r.from ? Math.min(100, (now - r.from) / (r.at - r.from) * 100) : 0;
+    const imsak = prayerAt('Imsak', new Date(r.at));
+    return `<div class="full"><div class="ttl">${t('ramadanKareem')} · ${t('day')} ${r.day}</div>` +
+      `<div class="sub" style="color:#fff;font-weight:600;margin-top:1px">${t(r.phase === 'iftar' ? 'iftarIn' : 'suhoorIn')}</div>` +
+      `<div class="bignum" style="font-size:24px">${dur(r.at - now)}</div>` +
+      (r.phase === 'iftar' ? `<div class="bar"><i style="width:${pct}%"></i></div><div class="sub" style="margin-top:2px">${t('iftarAt')} ${fmt(r.at, false, true)}</div>`
+        : `<div class="sub">${t('suhoorAt')} ${fmt(r.at, false, true)}${imsak ? ' · ' + t('imsak') + ' ' + fmt(imsak, false) : ''}</div>`) + `</div>`;
+  },
+  fx: () => {
+    if (!S.fx) return loadingFull(t('exchange'));
+    const f = S.fx, c = fxCalc();
+    return `<div class="full"><div class="ttl">${t('exchange')}</div>` +
+      `<div class="hl" dir="ltr" style="margin-top:2px;text-align:${isAr() ? 'right' : 'left'}">1 ${f.base} = ${f.r.toFixed(fxDig(f.r))} ${f.quote}</div>` +
+      `<div class="sub" dir="ltr" style="text-align:${isAr() ? 'right' : 'left'}">1 ${f.quote} = ${(1 / f.r).toFixed(fxDig(1 / f.r))} ${f.base}</div>` +
+      `<div class="calc" dir="ltr"><input id="fxIn" class="kin" data-hit inputmode="decimal" value="${esc(S.fxAmt)}">` +
+      `<button class="sw" data-hit data-act="fx-swap">${c.from} ${IC.swap}</button>` +
+      `<span class="res" id="fxRes">${c.res.toLocaleString('en-US', { maximumFractionDigits: 2 })} ${c.to}</span></div></div>`;
+  },
+  weather: () => {
+    if (!S.weather) return loadingFull(t('weather'));
+    const c = S.weather.c, [em, desc] = wxInfo(c.weather_code, c.is_day);
+    return `<div class="full"><div class="ttl">${esc(S.loc?.city || t('weather'))} · ${desc}</div>` +
+      `<div class="wx" style="margin-top:3px"><span class="em">${em}</span><div><div class="bignum" style="font-size:26px">${Math.round(c.temperature_2m)}°<small>C</small></div>` +
+      `<div class="sub" style="font-size:10px">${t('hi')} ${Math.round(S.weather.max)}° · ${t('lo')} ${Math.round(S.weather.min)}°</div></div>` +
+      `<dl><dt>${t('feels')}</dt><dd>${Math.round(c.apparent_temperature)}°</dd><dt>${t('humid')}</dt><dd>${c.relative_humidity_2m}%</dd><dt>${t('wind')}</dt><dd>${Math.round(c.wind_speed_10m)} ${t('kmh')}</dd></dl></div></div>`;
+  },
+  world: () => {
+    const now = new Date();
+    const rows = cfg.world.slice(0, 3).map(z => { const r = tzRow(z, now); return `<div><span>${esc(tzLabel(z))}<i>${r.off}${r.day ? ' · ' + r.day : ''}</i></span><b>${r.time}</b></div>`; }).join('');
+    return `<div class="full"><div class="ttl">${t('world')}</div>` +
+      `<div class="list" style="margin-top:6px;gap:4px">${rows}</div>` + gearBtn('world') + `</div>`;
+  },
+  events: () => {
+    const list = eventList();
+    if (!list.length) return `<div class="full"><div class="ttl">${t('events')}</div><div class="sub" style="margin-top:14px">${t('noEvents')}</div>${gearBtn('events')}</div>`;
+    const e = list[0];
+    const rest = list.slice(1, isAr() ? 2 : 3).map(x => `<div><span>${x.emoji} ${esc(x.title)}</span><b>${evWhen(x, true)}</b></div>`).join('');
+    return `<div class="full"><div class="ttl">${t('events')}</div>` +
+      `<div class="sub" style="color:#fff;font-weight:600;margin-top:2px">${e.emoji} ${esc(e.title)}</div>` +
+      `<div class="hl" style="font-size:19px">${evWhen(e, false)}</div>` +
+      `<div class="list" style="margin-top:2px">${rest}</div></div>`;
+  },
+  focus: () => {
+    const rem = fRemain(), pct = 100 - rem / fLen(F.phase) * 100;
+    return `<div class="full"><div class="ttl">${fName()} · ${F.done} ${t('sessions')}</div>` +
+      `<div class="bignum" style="font-size:27px;margin-top:1px">${dur(rem)}</div>` +
+      `<div class="bar" style="margin-top:4px"><i style="width:${Math.max(0, Math.min(100, pct))}%"></i></div>` +
+      `<div class="ctrl" dir="ltr"><button class="cb" data-hit data-act="f-reset" title="Reset">${IC.reset}</button>` +
+      `<button class="cb pp" data-hit data-act="f-toggle">${F.running ? IC.pause : IC.play}</button>` +
+      `<button class="cb" data-hit data-act="f-skip" title="Skip">${IC.skip}</button></div>` + gearBtn('focus') + `</div>`;
+  },
+  meet: () => {
+    const { active, next, today } = meetState(), now = Date.now();
+    if (!S.meet.configured) return `<div class="full"><div class="ttl">${t('meet')}</div><div class="sub" style="margin-top:8px;white-space:normal">${t('addIcal')}</div>${gearBtn('meet')}</div>`;
+    if (active) {
+      const pct = Math.min(100, (now - active.start) / (active.end - active.start) * 100);
+      return `<div class="full"><div class="ttl">${t('inMeeting')} · ${esc(active.account)}</div><div class="sub" style="color:#fff;font-weight:600">${esc(active.title)}</div>` +
+        `<div class="bignum" style="font-size:24px">${dur(active.end - now)}<small>${t('left')}</small></div><div class="bar"><i style="width:${pct}%"></i></div></div>`;
+    }
+    if (next) return `<div class="full"><div class="ttl">${t('nextMeet')} · ${esc(next.account)}</div><div class="sub" style="color:#fff;font-weight:600">${esc(next.title)}</div>` +
+      `<div class="bignum" style="font-size:24px">${dur(next.start - now)}</div><div class="sub">${t('at')} ${fmt(new Date(next.start), false, true)} · ${today.length} ${t('today')}</div></div>`;
+    return `<div class="full"><div class="ttl">${t('meet')}</div><div style="font-size:14px;font-weight:700;margin-top:10px">${t('noMoreCalls')}</div>${S.meet.errors ? `<div class="sub">${S.meet.errors} ${t('linksFailed')}</div>` : ''}</div>`;
+  },
+  media: () => {
+    const m = S.media, p = mediaPos(), pct = m.dur > 0 ? p / m.dur * 100 : 0;
+    return `<div class="full" dir="ltr"><div class="mfull">${artHTML('art')}<div class="info"><div class="t" dir="auto">${esc(m.title)}</div><div class="sub" dir="auto">${esc(m.artist || m.album || '')}</div>` +
+      `<div class="bar" style="margin-top:5px"><i style="width:${pct}%"></i></div><div class="times"><span>${mmss(p)}</span><span>${m.dur > 0 ? mmss(m.dur) : ''}</span></div></div></div>` +
+      `<div class="ctrl"><button class="cb" data-hit data-act="m-prev">${IC.prev}</button><button class="cb pp" data-hit data-act="m-toggle">${m.playing ? IC.pause : IC.play}</button><button class="cb" data-hit data-act="m-next">${IC.next}</button></div></div>`;
+  },
+};
+
+function cards() {
+  const c = cfg.cards, l = ['clock'];
+  if (c.hijri) l.push('hijri');
+  if (c.prayer) l.push('prayer');
+  if (ramadanInfo()) l.push('ramadan');
+  if (c.fx) l.push('fx');
+  if (c.weather) l.push('weather');
+  if (c.world && cfg.world.length) l.push('world');
+  if (c.events) l.push('events');
+  if (c.focus) l.push('focus');
+  if (c.meet && S.meet.configured) l.push('meet');
+  if (c.media && S.media.has) l.push('media');
+  return l;
+}
+
+/* ------------------------------------------------------------------ interaction */
+function onCursor(x, y, inside) {
+  let el = inside ? document.elementFromPoint(x, y) : null;
+  const hitEl = el && el.closest('[data-hit]');
+  const hit = !!(hitEl && !hitEl.closest('.hidden'));
+  if (hit !== S.hit) { S.hit = hit; post({ t: 'hit', v: hit }); }
+  let over = false;
+  if (inside) {
+    const pd = 4;
+    for (const id of ['#content', '#handle', '#aL', '#aR', '#lyrics']) {
+      const n = $(id); if (n.classList.contains('hidden') || n.classList.contains('off')) continue;
+      const r = n.getBoundingClientRect();
+      if (x >= r.left - pd && x <= r.right + pd && y >= r.top - pd && y <= r.bottom + pd) { over = true; break; }
+    }
+  }
+  if (over !== S.hover) {
+    S.hover = over;
+    $('#stage').classList.toggle('zoom', over && (S.mode === 'compact' || S.mode === 'hello'));
+    layout(); renderLyrics();
+  }
+  if (over && S.mode === 'full') S.fullUntil = Date.now() + 3000;
+}
+// fallback for previewing in a normal browser
+if (!host) {
+  addEventListener('mousemove', e => onCursor(e.clientX, e.clientY, true));
+  addEventListener('mouseleave', () => onCursor(-1, -1, false));
+}
+
+function enterFull() {
+  if (S.mode !== 'compact') return;
+  S.overlay = null; S.alert = null; S.mode = 'full'; S.fullUntil = Date.now() + 3000;
+  $('#stage').classList.remove('zoom');
+  render(true);
+}
+function collapse() {
+  if (S.mode !== 'full') return;
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  S.mode = 'compact'; render(true);
+}
+
+let animating = false;
+async function liquidSwitch(dir, mutate) {
+  if (animating || S.mode !== 'full') { mutate(); render(true); return; }
+  animating = true;
+  S.fullUntil = Date.now() + 3000;
+  const R = visRect(), cx = R.x + R.w / 2, cy = R.y + R.h / 2;
+  const A = $('#bA'), B = $('#bB'), M = $('#main');
+  css(A, R); css(B, circ(cx, cy, 18));
+  A.style.display = B.style.display = 'block'; M.style.visibility = 'hidden';
+  $('#sheen').classList.add('off');
+  layout();
+  if (curLayer) { curLayer.style.transition = 'transform .3s ease, opacity .22s ease'; curLayer.style.transform = `translateX(${-dir * 26}px) scale(.92)`; curLayer.style.opacity = '0'; }
+  const squash = { x: cx - R.w * .41 - dir * 12, y: R.y + 5, w: R.w * .82, h: R.h - 10, r: R.r };
+  const side = circ(cx + dir * (R.w / 2 + 34), cy, 46);
+  const o1 = { duration: 300, easing: 'cubic-bezier(.45,0,.3,1)', fill: 'forwards' };
+  await Promise.all([
+    A.animate([kf(R), kf(squash)], o1).finished,
+    B.animate([kf(circ(cx, cy, 18)), kf(circ(cx + dir * R.w * .32, cy, 40)), kf(side)], o1).finished,
+  ]);
+  mutate();
+  const v = view(); swapLayer(v, dir > 0 ? 'in-r' : 'in-l'); curKey = v.key;
+  const o2 = { duration: 560, easing: 'cubic-bezier(.3,1.32,.5,1)', fill: 'forwards' };
+  const exit = circ(cx - dir * (R.w / 2 + 30), cy, 24), gone = circ(cx - dir * (R.w / 2 + 40), cy, 0);
+  await Promise.all([
+    B.animate([kf(side), kf(R)], o2).finished,
+    A.animate([kf(squash), kf(exit), kf(gone)], { duration: 520, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' }).finished,
+  ]);
+  M.style.transition = 'none'; css(M, R); void M.offsetWidth; M.style.transition = ''; M.style.visibility = '';
+  for (const n of [A, B]) { n.getAnimations().forEach(a => a.cancel()); n.style.display = 'none'; }
+  $('#sheen').classList.remove('off');
+  animating = false;
+  render();
+}
+function nav(dir) {
+  const list = cards(); let i = list.indexOf(S.card); if (i < 0) i = 0;
+  const next = list[(i + dir + list.length) % list.length];
+  S.autoFrom = null;
+  liquidSwitch(dir, () => { S.card = next; });
+}
+function autoSwitch(card) {
+  if (S.card === card || S.mode === 'full' || S.mode === 'hello' || S.mode === 'boot' || S.mode === 'onboard') return;
+  if (!cards().includes(card)) return;
+  if (!S.autoFrom) S.autoFrom = S.card;
+  S.card = card; render(true);
+}
+function backFromAuto() {
+  if (S.autoFrom) { S.card = cards().includes(S.autoFrom) ? S.autoFrom : 'clock'; S.autoFrom = null; if (S.mode !== 'full') render(true); }
+  else if (!cards().includes(S.card)) { S.card = 'clock'; render(true); }
+}
+
+/* ------------------------------------------------------------------ alerts (adhan, focus, events) */
+let audio = null;
+function stopSound() { if (audio) { try { audio.pause(); } catch {} audio = null; } }
+function playSound(kind) {
+  stopSound();
+  if (kind === 'adhan') {
+    const a = cfg.adhan, vol = a.volume / 100;
+    if (a.sound === 'none') return;
+    if (a.sound === 'file' && a.file) {
+      audio = new Audio('https://sounds.glance.local/' + encodeURIComponent(a.file));
+      audio.volume = Math.max(0, Math.min(1, vol));
+      audio.onended = () => { if (S.alert && S.alert.sound === 'adhan') S.alert.until = Date.now() + 3000; audio = null; };
+      audio.play().catch(() => chime(vol));
+      return;
+    }
+    chime(vol, 'adhan');
+  } else if (kind) chime(0.6, 'focus');
+}
+function raiseAlert(a) {
+  if (a.sound) playSound(a.sound);
+  if (S.mode === 'boot' || S.mode === 'onboard' || S.mode === 'hello') return;
+  if (S.mode === 'full' && !S.inputFocus) S.mode = 'compact';
+  S.overlay = null;
+  S.alert = { ...a, until: Date.now() + (a.ms || 15000) };
+  render(true);
+  liquidPulse();
+}
+function dismissAlert() { stopSound(); S.alert = null; render(true); }
+async function liquidPulse() {
+  if (animating) return;
+  await new Promise(r => setTimeout(r, 350));
+  const R = visRect(), cx = R.x + R.w / 2, B = $('#bB');
+  B.style.display = 'block';
+  for (let i = 0; i < 2 && S.alert; i++) {
+    await B.animate([kf(circ(cx, R.y + R.h - 13, 20)), kf(circ(cx, R.y + R.h + 16, 17)), kf(circ(cx, R.y + R.h - 13, 20))],
+      { duration: 760, easing: 'cubic-bezier(.45,0,.35,1.3)' }).finished;
+  }
+  if (!animating) B.style.display = 'none';
+}
+
+function prayerTick(now) {
+  if (!S.prayer) return;
+  const nd = new Date(now), day = dayStr(nd);
+  for (const p of SALAH) {
+    const at = prayerAt(p, nd); if (!at) continue;
+    const diff = now - at, key = day + p;
+    const rm = cfg.prayer.remindMin * 60e3;
+    if (rm > 0 && diff < 0 && -diff <= rm && !S.fired.has('r' + key)) { S.fired.add('r' + key); autoSwitch('prayer'); }
+    if (diff >= 0 && diff < 90e3 && !S.fired.has('a' + key)) {
+      S.fired.add('a' + key);
+      const iq = (+cfg.adhan.iqama[p] || 0) * 60e3;
+      S.iqama = iq ? { name: p, at: +at + iq } : null;
+      if (cfg.adhan.enabled && cfg.adhan.prayers[p]) raiseAlert({ id: 'a' + key, icon: '🕌', title: `${t('adhanNow')} ${t(p)}`, sound: 'adhan', ms: cfg.adhan.sound === 'file' ? 240000 : 20000 });
+      autoSwitch('prayer');
+    }
+  }
+  if (S.iqama && now > S.iqama.at) S.iqama = null;
+  // ramadan: show the iftar countdown 30 minutes before maghrib
+  const r = ramadanInfo();
+  if (r && r.phase === 'iftar' && r.at - now < 30 * 60e3 && !S.fired.has('ift' + day)) { S.fired.add('ift' + day); autoSwitch('ramadan'); }
+}
+function prayerHot(now) {
+  if (S.iqama) return true;
+  const n = nextPrayer(), rm = cfg.prayer.remindMin * 60e3;
+  return !!(n && rm > 0 && n.at - now <= rm);
+}
+function eventTick(now) {
+  for (const e of eventList()) {
+    if (e.allDay || !e.user) continue;
+    const k = 'e' + e.title + e.at;
+    if (now >= e.at && now - e.at < 60e3 && !S.fired.has(k)) { S.fired.add(k); raiseAlert({ id: k, icon: e.emoji, title: e.title, sound: 'focus', ms: 15000 }); }
+  }
+}
+
+function act(a, el) {
+  switch (a) {
+    case 'wave': {
+      curLayer && curLayer.classList.add('waving');
+      setTimeout(() => { S.mode = 'compact'; S.card = 'clock'; S.hover = false; $('#stage').classList.remove('zoom'); render(true); }, 650);
+      break;
+    }
+    case 'onb-go': {
+      const inp = $('#nameIn'), name = (inp ? inp.value : S.nameDraft).trim();
+      if (!name) { inp && inp.classList.remove('shake'); void (inp && inp.offsetWidth); inp && inp.classList.add('shake'); inp && inp.focus(); break; }
+      cfg.name = name;
+      post({ t: 'patch', patch: { name, lang: cfg.lang } });
+      if (document.activeElement) document.activeElement.blur();
+      wantFocus(false);
+      S.mode = 'hello'; render(true);
+      break;
+    }
+    case 'onb-lang': {
+      const inp = $('#nameIn'); if (inp) S.nameDraft = inp.value;
+      cfg.lang = isAr() ? 'en' : 'ar'; applyLook(); render(true);
+      setTimeout(focusName, 60);
+      break;
+    }
+    case 'toggle': S.mode === 'full' ? collapse() : enterFull(); break;
+    case 'prev': nav(-1); break;
+    case 'next': nav(1); break;
+    case 'm-prev': post({ t: 'media', cmd: 'prev' }); break;
+    case 'm-next': post({ t: 'media', cmd: 'next' }); break;
+    case 'm-toggle': post({ t: 'media', cmd: 'toggle' }); S.media.playing = !S.media.playing; render(); break;
+    case 'pin': cfg.pinned = !cfg.pinned; post({ t: 'patch', patch: { pinned: cfg.pinned } }); layout(); renderLyrics(); break;
+    case 'settings': post({ t: 'settings', section: (el && el.dataset.section) || null }); break;
+    case 'fx-swap': S.fxRev = !S.fxRev; render(); break;
+    case 'f-toggle': F.running ? fPause() : fStart(); S.fullUntil = Date.now() + 3000; render(); break;
+    case 'f-reset': fReset(); render(); break;
+    case 'f-skip': fFinish(true); render(); break;
+    case 'alert-x': dismissAlert(); break;
+  }
+}
+// pointerdown (not click) so a re-render between press and release never swallows the action
+document.addEventListener('pointerdown', e => {
+  const b = e.target.closest('[data-act]'); if (!b || b.closest('.hidden')) return;
+  e.preventDefault(); act(b.dataset.act, b);
+});
+// text fields: the host makes the window focusable while one is in use.
+// Activating the window briefly blurs the field, so "focus off" is debounced and re-checked.
+let hostFocus = false, focusOffT = 0;
+const isKin = el => !!(el && el.classList && el.classList.contains('kin'));
+function wantFocus(v) {
+  clearTimeout(focusOffT);
+  if (v) { S.inputFocus = true; if (!hostFocus) { hostFocus = true; post({ t: 'focus', v: true }); } return; }
+  focusOffT = setTimeout(() => {
+    if (isKin(document.activeElement) && document.hasFocus()) return;
+    S.inputFocus = false; S.fullUntil = Date.now() + 3000;
+    if (hostFocus) { hostFocus = false; post({ t: 'focus', v: false }); }
+  }, 250);
+}
+document.addEventListener('focusin', e => { if (isKin(e.target)) wantFocus(true); });
+document.addEventListener('focusout', e => { if (isKin(e.target)) wantFocus(false); });
+document.addEventListener('pointerdown', e => { if (isKin(e.target)) { wantFocus(true); setTimeout(() => e.target.focus(), 30); } }, true);
+function focusName() { const n = $('#nameIn'); if (n) { wantFocus(true); setTimeout(() => n.focus(), 60); } }
+document.addEventListener('input', e => {
+  if (e.target.id === 'nameIn') { S.nameDraft = e.target.value; return; }
+  if (e.target.id !== 'fxIn' || !S.fx) return;
+  S.fxAmt = e.target.value.replace(/[^\d.]/g, '');
+  const c = fxCalc();
+  $('#fxRes').textContent = c.res.toLocaleString('en-US', { maximumFractionDigits: 2 }) + ' ' + c.to;
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.id === 'nameIn') { act('onb-go'); return; }
+  if ((e.key === 'Enter' || e.key === 'Escape') && S.mode !== 'onboard') document.activeElement && document.activeElement.blur();
+});
+
+/* ------------------------------------------------------------------ host events */
+function onVol(m) {
+  const changed = S.vol && (S.vol.v !== m.v || S.vol.muted !== m.muted);
+  S.vol = m;
+  if (!changed || S.mode === 'hello' || S.mode === 'boot' || S.mode === 'onboard') return;
+  if (S.mode === 'full' && !S.inputFocus) S.mode = 'compact';
+  S.overlay = 'volume'; S.overlayUntil = Date.now() + 1800;
+  render();
+}
+function onMedia(m) {
+  const prev = S.media;
+  S.media = m;
+  if (!m.has) { LY.key = ''; LY.status = ''; if (S.card === 'media') backFromAuto(); render(); return; }
+  const key = m.title + '|' + m.artist, newTrack = key !== S.mediaKey;
+  S.mediaKey = key;
+  if (m.title) loadLyrics(m);
+  if (m.playing) S.lastPlaying = Date.now();
+  if (m.playing && (newTrack || !prev.playing) && cfg.cards.media) autoSwitch('media');
+  render();
+}
+
+/* ------------------------------------------------------------------ boot + loops */
+async function dropIn(target) {
+  S.mode = target; animating = true;
+  const v = view(); swapLayer(v, 'in'); curKey = v.key; curLayer.style.opacity = '0';
+  measure();
+  const R = visRect(), cx = CX();
+  const M = $('#main'), B = $('#bB'), bar = $('#bar');
+  M.style.transition = 'none'; css(M, { x: cx - 12, y: -30, w: 24, h: 24, r: 12 }); void M.offsetWidth; M.style.transition = '';
+  $('#sheen').classList.add('off');
+  bar.style.transition = 'none'; css(bar, { x: cx, y: -12, w: 0, h: 16, r: 0 }); void bar.offsetWidth; bar.style.transition = '';
+  await new Promise(r => setTimeout(r, 120));
+  css(bar, { x: cx - 45, y: -12, w: 90, h: 16, r: 0 });
+  B.style.display = 'block';
+  await B.animate([kf(circ(cx, -10, 14)), kf(circ(cx, 12, 22)), kf(circ(cx, R.y + R.h + 10, 18))],
+    { duration: 520, easing: 'cubic-bezier(.5,0,.75,.4)', fill: 'forwards' }).finished;
+  css(M, R, target === 'onboard' ? 0 : 22);
+  await B.animate([kf(circ(cx, R.y + R.h + 10, 18)), kf(circ(cx, R.y + R.h / 2, 26))], { duration: 380, easing: 'cubic-bezier(.3,1.3,.5,1)', fill: 'forwards' }).finished;
+  B.getAnimations().forEach(a => a.cancel()); B.style.display = 'none';
+  $('#sheen').classList.remove('off');
+  curLayer.style.transition = 'opacity .4s'; curLayer.style.opacity = '1';
+  animating = false;
+  layout();
+  if (target === 'onboard') setTimeout(focusName, 300);
+}
+
+async function start() {
+  const w = lsGet('weather'), f = lsGet('fx2');
+  if (w) S.weather = w;
+  if (f && f.base === cfg.fx.base && f.quote === cfg.fx.quote) S.fx = f;
+  if (F.day !== new Date().toDateString()) { F.day = new Date().toDateString(); F.done = 0; fSave(); }
+  dropIn(cfg.name ? 'hello' : 'onboard');
+  S.loc = await resolveLoc();
+  const c = lsGet('prayer');
+  if (c && c.key === prayerKey(dayStr(new Date()))) S.prayer = c;
+  loadPrayer(); loadWeather(); loadFx();
+  setInterval(loadWeather, 15 * 60e3);
+  setInterval(loadFx, 3 * 3600e3);
+  setInterval(async () => {
+    if (!S.prayer || S.prayer.day !== dayStr(new Date())) { S.loc = await resolveLoc(); loadPrayer(); }
+  }, 60e3);
+}
+
+let lastSec = 0;
+setInterval(() => {
+  if (S.mode === 'boot') return;
+  const now = Date.now();
+  if (S.overlay && now > S.overlayUntil) S.overlay = null;
+  if (S.alert && now > S.alert.until) { stopSound(); S.alert = null; render(true); }
+  if (S.mode === 'full' && !animating && !S.hover && !S.inputFocus && now > S.fullUntil) collapse();
+  if (Math.floor(now / 1000) !== lastSec) {
+    lastSec = Math.floor(now / 1000);
+    prayerTick(now);
+    eventTick(now);
+    if (F.running && now >= F.endAt) fFinish(false);
+  }
+  // meetings: jump to the countdown when a call starts or is 5 minutes away
+  const ms = meetState();
+  const target = ms.active || (ms.next && ms.next.start - now < 5 * 60e3 ? ms.next : null);
+  if (target) { const id = target.title + target.start; if (S.meetShown !== id) { S.meetShown = id; autoSwitch('meet'); } }
+  else if (S.card === 'meet' && S.autoFrom) backFromAuto();
+  // media: go back to the previous card after 20s paused
+  if (S.card === 'media' && S.autoFrom && (!S.media.has || (!S.media.playing && now - S.lastPlaying > 20000))) backFromAuto();
+  if (S.card === 'prayer' && S.autoFrom && !prayerHot(now)) backFromAuto();
+  if (S.card === 'ramadan' && !ramadanInfo()) backFromAuto();
+  if (!animating) render();
+}, 250);
+
+addEventListener('resize', () => layout());
+post({ t: 'ready' });
+if (!host) onSettings({ name: new URLSearchParams(location.search).get('name') ?? '' });
+</script>
+</body>
+</html>

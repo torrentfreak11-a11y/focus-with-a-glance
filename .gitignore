@@ -1,0 +1,24 @@
+# Build output
+bin/
+obj/
+publish/
+output/
+packaging/out/
+*.msix
+*.msixupload
+*.appx
+*.appxbundle
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Local settings and secrets
+*.settings.json
+*.pfx
+
+# OS
+Thumbs.db
+Desktop.ini

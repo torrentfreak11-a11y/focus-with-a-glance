@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Settings</title>
+<style>
+:root{color-scheme:dark;--acc:#8fdcff;--card:rgba(255,255,255,.055);--card2:rgba(255,255,255,.09);--line:rgba(255,255,255,.08);
+  --fg:#f3f5fa;--fg2:rgba(232,238,255,.62);--fg3:rgba(232,238,255,.4);--ease:cubic-bezier(.2,.8,.2,1)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{display:flex;font:13px/1.4 "Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;color:var(--fg);overflow:hidden;
+  background:linear-gradient(155deg,rgba(26,30,48,.82),rgba(10,12,20,.9));-webkit-user-select:none;user-select:none}
+button{font:inherit;color:inherit;cursor:pointer}
+aside{width:212px;flex:none;padding:18px 10px;display:flex;flex-direction:column;gap:2px;border-inline-end:1px solid var(--line);overflow-y:auto;background:rgba(0,0,0,.12)}
+.brand{display:flex;align-items:center;gap:10px;padding:2px 10px 16px}
+.brand .dot{width:30px;height:30px;border-radius:15px;background:radial-gradient(70% 70% at 30% 25%,rgba(255,255,255,.4),rgba(255,255,255,.05)),#121624;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.35),0 0 18px color-mix(in srgb,var(--acc) 35%,transparent)}
+.brand b{font-size:13.5px;display:block}
+.brand small{color:var(--fg3);font-size:11px}
+nav button{all:unset;display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:9px;cursor:pointer;color:var(--fg2);font-size:13px}
+nav button:hover{background:var(--card)}
+nav button.on{background:var(--card2);color:var(--fg);box-shadow:inset 3px 0 0 var(--acc)}
+[dir=rtl] nav button.on{box-shadow:inset -3px 0 0 var(--acc)}
+nav .e{width:20px;text-align:center;font-size:14px}
+main{flex:1;overflow-y:auto;padding:26px 30px 40px;scroll-behavior:smooth}
+main::-webkit-scrollbar,aside::-webkit-scrollbar{width:10px}
+main::-webkit-scrollbar-thumb,aside::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:5px;border:3px solid transparent;background-clip:padding-box}
+h1{font:600 22px "Segoe UI Variable Display","Segoe UI",sans-serif;margin:0 0 4px}
+.lead{color:var(--fg2);margin:0 0 20px;max-width:560px}
+h2{font-size:12px;font-weight:600;color:var(--fg3);text-transform:uppercase;letter-spacing:.8px;margin:22px 4px 8px}
+[dir=rtl] h2{letter-spacing:0;font-size:12.5px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.row{display:flex;align-items:center;gap:16px;padding:11px 14px;min-height:52px}
+.row+.row{border-top:1px solid var(--line)}
+.rl{flex:1;min-width:0}
+.rl b{font-weight:600;display:block}
+.rl small{display:block;color:var(--fg2);font-size:12px;margin-top:1px}
+.rc{flex:none;display:flex;align-items:center;gap:8px}
+input[type=text],input[type=number],input[type=date],input[type=time],input:not([type]),select,textarea{
+  font:inherit;color:var(--fg);background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:6px 9px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 2px color-mix(in srgb,var(--acc) 25%,transparent)}
+select{min-width:200px;max-width:300px}
+select option{background:#1a1d2a}
+input[type=number]{width:72px}
+textarea{width:100%;min-height:110px;resize:vertical;font:12px Consolas,monospace;-webkit-user-select:text;user-select:text}
+input{-webkit-user-select:text;user-select:text}
+/* switch */
+.sw{appearance:none;width:40px;height:22px;border-radius:11px;background:rgba(255,255,255,.18);position:relative;cursor:pointer;transition:background .2s;margin:0;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:8px;background:#fff;transition:left .22s var(--ease);box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.sw:checked{background:var(--acc)}
+.sw:checked::after{left:21px}
+[dir=rtl] .sw::after{left:auto;right:3px;transition:right .22s var(--ease)}
+[dir=rtl] .sw:checked::after{right:21px}
+/* segmented */
+.seg{display:inline-flex;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:2px;gap:2px}
+.seg button{all:unset;cursor:pointer;padding:5px 12px;border-radius:7px;color:var(--fg2);font-size:12.5px;white-space:nowrap}
+.seg button:hover{color:var(--fg)}
+.seg button.on{background:color-mix(in srgb,var(--acc) 30%,rgba(255,255,255,.08));color:#fff;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 45%,transparent)}
+.btn{all:unset;cursor:pointer;padding:6px 14px;border-radius:8px;background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);font-size:12.5px;white-space:nowrap}
+.btn:hover{background:rgba(255,255,255,.16)}
+.btn.pri{background:color-mix(in srgb,var(--acc) 35%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 60%,transparent)}
+.btn.danger{background:rgba(255,90,90,.16);box-shadow:inset 0 0 0 1px rgba(255,110,110,.35)}
+.x{all:unset;cursor:pointer;width:26px;height:26px;border-radius:13px;display:grid;place-items:center;color:var(--fg2)}
+.x:hover{background:rgba(255,100,100,.18);color:#fff}
+input[type=range]{width:200px;accent-color:var(--acc)}
+output{min-width:44px;text-align:end;color:var(--fg2);font-variant-numeric:tabular-nums}
+.sws{display:flex;gap:8px}
+.swatch{all:unset;cursor:pointer;width:26px;height:26px;border-radius:13px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.3);transition:transform .15s}
+.swatch:hover{transform:scale(1.12)}
+.swatch.on{box-shadow:0 0 0 2px #fff,0 0 0 4px rgba(0,0,0,.5)}
+.preview{padding:12px 14px;color:var(--fg2);font-size:12.5px;border-top:1px solid var(--line);background:rgba(0,0,0,.12)}
+.preview b{color:var(--fg)}
+.tunes{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:12px 14px}
+.tunes label{display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:var(--fg2)}
+.tunes input{width:100%}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:12px 14px}
+.grid5 label{display:flex;flex-direction:column;gap:6px;align-items:flex-start;font-size:11.5px;color:var(--fg2)}
+.grid5 input[type=number]{width:100%}
+.listrow{display:flex;gap:8px;align-items:center;padding:9px 14px}
+.listrow+.listrow{border-top:1px solid var(--line)}
+.listrow .grow{flex:1;min-width:0}
+.listrow .emo{width:44px;text-align:center}
+.hint{color:var(--fg2);font-size:12px;padding:10px 14px}
+.results{display:flex;flex-direction:column;padding:4px 8px 8px}
+.results button{all:unset;cursor:pointer;padding:7px 8px;border-radius:7px}
+.results button:hover{background:var(--card2)}
+.results small{color:var(--fg3);margin-inline-start:6px}
+.muted{color:var(--fg3)}
+.pill{display:inline-block;padding:2px 9px;border-radius:9px;background:var(--card2);font-size:12px}
+ol{margin:6px 0;padding-inline-start:20px;color:var(--fg2)}
+a{color:var(--acc);cursor:pointer;text-decoration:none}
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand"><div class="dot"></div><div><b>Focus with a glance</b><small id="ver"></small></div></div>
+  <nav id="nav"></nav>
+</aside>
+<main id="main"><div id="sec"></div></main>
+<datalist id="tzlist"></datalist>
+
+<script src="common.js"></script>
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const host = window.chrome && window.chrome.webview;
+const post = m => { if (host) host.postMessage(m); };
+
+let cfg = merge(DEFAULTS, {}), screens = [], version = '', links = {}, cur = (location.hash || '#general').slice(1);
+let currencies = null, rates = null, cityResults = [], cityBusy = false;
+
+/* ------------------------------------------------------------------ strings */
+const ST = {
+  en: {
+    general: 'General', cards: 'Cards', prayer: 'Prayer times', adhan: 'Adhan & Ramadan', currency: 'Currency', hijri: 'Hijri date',
+    focus: 'Focus timer', world: 'World clock', events: 'Countdown', meet: 'Google Meet', look: 'Look & position', about: 'About',
+    generalLead: 'Your name, language and clock.', name: 'Your name', nameD: 'Shown in the greeting when Windows starts.',
+    lang: 'Language', use24h: '24-hour clock', secs: 'Show seconds', autostart: 'Start with Windows', autostartD: 'Open the widget when you sign in.',
+    cardsLead: 'Choose which cards appear when you use the arrows in the full widget. The clock is always there.',
+    cHijri: 'Hijri date', cHijriD: 'Today in the Islamic calendar.', cPrayer: 'Prayer times', cPrayerD: 'Next prayer, with all of today’s times.',
+    cFx: 'Exchange rate', cFxD: 'Live rate and a quick converter.', cWeather: 'Weather', cWeatherD: 'Current conditions in °C.',
+    cWorld: 'World clock', cWorldD: 'Up to three other time zones.', cEvents: 'Countdown', cEventsD: 'Days left to dates you care about.',
+    cFocus: 'Focus timer', cFocusD: 'Pomodoro sessions with breaks.', cMeet: 'Google Meet', cMeetD: 'Countdown for timed meetings.',
+    cMedia: 'Media player', cMediaD: 'Appears when music or video plays.',
+    prayerLead: 'Times are calculated for your location by the Aladhan service.',
+    location: 'Location', locAuto: 'Auto-detect', locManual: 'Choose a city', locD: 'Auto-detect uses your internet connection’s approximate location.',
+    search: 'Search', searchPh: 'Type a city name…', current: 'Current', noResults: 'No cities found.',
+    method: 'Calculation method', methodAuto: 'Automatic (by country)', asr: 'Asr time', asrStd: 'Standard', asrHanafi: 'Hanafi',
+    remind: 'Reminder before adhan', remindD: 'The notch counts down to the next prayer.', off: 'Off', min: 'min',
+    tune: 'Fine-tune (minutes)', tuneD: 'Match your local mosque by moving each time a few minutes.',
+    adhanLead: 'An alert when each prayer time arrives, then a countdown to iqama.',
+    adhanOn: 'Prayer-time alert', adhanOnD: 'The notch drops a liquid alert and plays a sound.',
+    sound: 'Sound', sChime: 'Soft chime', sFile: 'My adhan file', sNone: 'Silent', choose: 'Choose file…', noFile: 'No file chosen',
+    fileD: 'Pick any adhan recording you have (mp3, m4a, wav).', volume: 'Volume', test: 'Test', stop: 'Stop',
+    perPrayer: 'Alert for', iqama: 'Iqama after adhan (minutes)', iqamaD: 'Set to 0 to skip the iqama countdown.',
+    ramadan: 'Ramadan mode', ramadanD: 'Iftar and suhoor countdowns plus the fasting day.', rAuto: 'Automatic', rOn: 'Always on', rOff: 'Off',
+    currencyLead: 'Pick the two currencies the widget shows. Rates update every few hours.',
+    from: 'From', to: 'To', swap: 'Swap',
+    hijriLead: 'Choose how the Hijri date is calculated and written.',
+    calendar: 'Calendar', calUQ: 'Umm al-Qura (Saudi Arabia)', calIs: 'Astronomical', calCivil: 'Civil (tabular)', calTbla: 'Tabular (Thursday epoch)',
+    hLang: 'Language', hFollow: 'Follow app', digits: 'Digits', style: 'Style', stLong: 'Long', stWeek: 'With weekday', stShort: 'Day & month', stNum: 'Numeric',
+    adjust: 'Adjust days', adjustD: 'Shift by a day to match local moon sighting.', preview: 'Preview',
+    focusLead: 'Work in focused sessions with short breaks. Start it from the Focus card.',
+    work: 'Focus length', brk: 'Short break', longBrk: 'Long break', every: 'Long break after', sessions: 'sessions', fSound: 'Play a sound when a session ends',
+    worldLead: 'Add up to three places. Type to search time zones, e.g. “London”.', zone: 'Time zone', label: 'Label (optional)', add: 'Add',
+    eventsLead: 'Count down to trips, birthdays or anything else.', title: 'Title', yearly: 'Every year',
+    islamicEv: 'Islamic occasions', islamicEvD: 'Ramadan, Eid al-Fitr, Day of Arafah, Eid al-Adha and the Islamic New Year.', upcoming: 'Coming up',
+    meetLead: 'Countdown for timed Google Meet calls, from any number of Google accounts.',
+    ical: 'Secret iCal links', icalD: 'One link per line, one per account.',
+    how: 'How to get the link', how1: 'Open Google Calendar on the web → Settings.', how2: 'Under “Settings for my calendars”, pick your calendar.',
+    how3: 'Scroll to “Integrate calendar” and copy “Secret address in iCal format”.', how4: 'Paste it here. Repeat for each Google account.',
+    icalPrivate: 'Keep these links private: anyone with them can read your calendar. They are stored only on this PC.',
+    lookLead: 'Make the glass yours.', accent: 'Accent color', glass: 'Glass color', tint: 'Glass tint', tintD: 'Lower is clearer, higher is easier to read.',
+    position: 'Position', pCenter: 'Top center', pLeft: 'Top left', pRight: 'Top right', monitor: 'Display', mMain: 'Main display',
+    aboutLead: 'A liquid-glass notch widget for Windows.', version: 'Version', services: 'Online services used',
+    svcD: 'The widget talks directly to these free services. No account, no tracking, nothing is sent anywhere else.',
+    svc1: 'Approximate location (ipwho.is / ipapi.co) — only when Location is set to auto-detect',
+    svc2: 'Prayer times (aladhan.com)', svc3: 'Weather and city search (open-meteo.com)', svc4: 'Exchange rates (open.er-api.com)',
+    svc5: 'Lyrics (lrclib.net)', svc6: 'Your Google Calendar iCal links, if you add them',
+    reset: 'Reset all settings', resetD: 'Your name is kept.', resetQ: 'Reset every setting to its default?',
+    donate: 'Support the project', donateD: 'Focus with a glance is free. A small tip keeps it growing.', donateBtn: 'Buy me a coffee',
+    source: 'Source code', sourceD: 'Open source on GitHub. Ideas and bug reports are welcome.', privacy: 'Privacy policy', open: 'Open',
+  },
+  ar: {
+    general: 'عام', cards: 'البطاقات', prayer: 'أوقات الصلاة', adhan: 'الأذان ورمضان', currency: 'العملات', hijri: 'التاريخ الهجري',
+    focus: 'مؤقت التركيز', world: 'الساعة العالمية', events: 'العد التنازلي', meet: 'Google Meet', look: 'المظهر والموضع', about: 'حول',
+    generalLead: 'اسمك ولغتك وإعدادات الساعة.', name: 'اسمك', nameD: 'يظهر في الترحيب عند بدء Windows.',
+    lang: 'اللغة', use24h: 'نظام 24 ساعة', secs: 'إظهار الثواني', autostart: 'التشغيل مع Windows', autostartD: 'فتح الأداة عند تسجيل الدخول.',
+    cardsLead: 'اختر البطاقات التي تظهر عند التنقل بالأسهم في الأداة الكاملة. الساعة موجودة دائماً.',
+    cHijri: 'التاريخ الهجري', cHijriD: 'تاريخ اليوم بالتقويم الهجري.', cPrayer: 'أوقات الصلاة', cPrayerD: 'الصلاة القادمة مع جميع أوقات اليوم.',
+    cFx: 'سعر الصرف', cFxD: 'السعر الحالي مع محوّل سريع.', cWeather: 'الطقس', cWeatherD: 'الحالة الحالية بالدرجة المئوية.',
+    cWorld: 'الساعة العالمية', cWorldD: 'حتى ثلاث مناطق زمنية أخرى.', cEvents: 'العد التنازلي', cEventsD: 'الأيام المتبقية لمواعيدك المهمة.',
+    cFocus: 'مؤقت التركيز', cFocusD: 'جلسات بومودورو مع استراحات.', cMeet: 'Google Meet', cMeetD: 'عد تنازلي للاجتماعات المجدولة.',
+    cMedia: 'مشغل الوسائط', cMediaD: 'يظهر عند تشغيل الموسيقى أو الفيديو.',
+    prayerLead: 'تُحسب الأوقات لموقعك عبر خدمة الأذان (Aladhan).',
+    location: 'الموقع', locAuto: 'تحديد تلقائي', locManual: 'اختيار مدينة', locD: 'التحديد التلقائي يستخدم الموقع التقريبي لاتصالك بالإنترنت.',
+    search: 'بحث', searchPh: 'اكتب اسم المدينة…', current: 'الحالي', noResults: 'لم يتم العثور على مدن.',
+    method: 'طريقة الحساب', methodAuto: 'تلقائي (حسب الدولة)', asr: 'وقت العصر', asrStd: 'الجمهور', asrHanafi: 'الحنفي',
+    remind: 'تذكير قبل الأذان', remindD: 'يعرض الشريط العد التنازلي للصلاة القادمة.', off: 'إيقاف', min: 'دقيقة',
+    tune: 'ضبط دقيق (بالدقائق)', tuneD: 'طابق مسجدك المحلي بتقديم أو تأخير كل وقت بضع دقائق.',
+    adhanLead: 'تنبيه عند دخول وقت كل صلاة، ثم عد تنازلي للإقامة.',
+    adhanOn: 'تنبيه وقت الصلاة', adhanOnD: 'ينزل تنبيه سائل من الشريط مع صوت.',
+    sound: 'الصوت', sChime: 'نغمة هادئة', sFile: 'ملف أذان خاص', sNone: 'صامت', choose: 'اختيار ملف…', noFile: 'لم يتم اختيار ملف',
+    fileD: 'اختر أي تسجيل أذان لديك (mp3 أو m4a أو wav).', volume: 'مستوى الصوت', test: 'تجربة', stop: 'إيقاف',
+    perPrayer: 'التنبيه لـ', iqama: 'الإقامة بعد الأذان (بالدقائق)', iqamaD: 'اجعلها 0 لإلغاء عدّاد الإقامة.',
+    ramadan: 'وضع رمضان', ramadanD: 'عد تنازلي للإفطار والسحور مع رقم يوم الصيام.', rAuto: 'تلقائي', rOn: 'مفعّل دائماً', rOff: 'إيقاف',
+    currencyLead: 'اختر العملتين اللتين تعرضهما الأداة. تُحدَّث الأسعار كل بضع ساعات.',
+    from: 'من', to: 'إلى', swap: 'تبديل',
+    hijriLead: 'اختر طريقة حساب التاريخ الهجري وكتابته.',
+    calendar: 'التقويم', calUQ: 'أم القرى (السعودية)', calIs: 'فلكي', calCivil: 'مدني (جدولي)', calTbla: 'جدولي (بداية الخميس)',
+    hLang: 'اللغة', hFollow: 'حسب التطبيق', digits: 'الأرقام', style: 'الشكل', stLong: 'كامل', stWeek: 'مع اسم اليوم', stShort: 'اليوم والشهر', stNum: 'رقمي',
+    adjust: 'تعديل الأيام', adjustD: 'قدّم أو أخّر يوماً ليوافق رؤية الهلال المحلية.', preview: 'معاينة',
+    focusLead: 'اعمل بجلسات تركيز مع استراحات قصيرة. ابدأ من بطاقة التركيز.',
+    work: 'مدة التركيز', brk: 'استراحة قصيرة', longBrk: 'استراحة طويلة', every: 'استراحة طويلة بعد', sessions: 'جلسات', fSound: 'تشغيل صوت عند انتهاء الجلسة',
+    worldLead: 'أضف حتى ثلاثة أماكن. اكتب للبحث عن منطقة زمنية، مثل “London”.', zone: 'المنطقة الزمنية', label: 'الاسم (اختياري)', add: 'إضافة',
+    eventsLead: 'عد تنازلي للرحلات وأعياد الميلاد وأي موعد آخر.', title: 'العنوان', yearly: 'كل سنة',
+    islamicEv: 'المناسبات الإسلامية', islamicEvD: 'رمضان وعيد الفطر ويوم عرفة وعيد الأضحى ورأس السنة الهجرية.', upcoming: 'القادمة',
+    meetLead: 'عد تنازلي لاجتماعات Google Meet المجدولة من أي عدد من حسابات Google.',
+    ical: 'روابط iCal السرية', icalD: 'رابط في كل سطر، رابط لكل حساب.',
+    how: 'كيف تحصل على الرابط', how1: 'افتح تقويم Google على الويب ← الإعدادات.', how2: 'من “إعدادات التقويمات الخاصة بي” اختر تقويمك.',
+    how3: 'انزل إلى “دمج التقويم” وانسخ “العنوان السري بتنسيق iCal”.', how4: 'الصقه هنا. كرر ذلك لكل حساب Google.',
+    icalPrivate: 'احتفظ بهذه الروابط لنفسك: من يملكها يستطيع قراءة تقويمك. تُحفظ على هذا الجهاز فقط.',
+    lookLead: 'اجعل الزجاج على ذوقك.', accent: 'لون التمييز', glass: 'لون الزجاج', tint: 'عتامة الزجاج', tintD: 'الأقل أوضح، والأعلى أسهل للقراءة.',
+    position: 'الموضع', pCenter: 'أعلى الوسط', pLeft: 'أعلى اليسار', pRight: 'أعلى اليمين', monitor: 'الشاشة', mMain: 'الشاشة الرئيسية',
+    aboutLead: 'أداة شريط زجاجي سائل لنظام Windows.', version: 'الإصدار', services: 'الخدمات المستخدمة عبر الإنترنت',
+    svcD: 'تتصل الأداة مباشرة بهذه الخدمات المجانية. بلا حساب وبلا تتبع، ولا يُرسل شيء إلى أي مكان آخر.',
+    svc1: 'الموقع التقريبي (ipwho.is / ipapi.co) — فقط عند اختيار التحديد التلقائي',
+    svc2: 'أوقات الصلاة (aladhan.com)', svc3: 'الطقس والبحث عن المدن (open-meteo.com)', svc4: 'أسعار الصرف (open.er-api.com)',
+    svc5: 'كلمات الأغاني (lrclib.net)', svc6: 'روابط iCal لتقويم Google إن أضفتها',
+    reset: 'إعادة ضبط كل الإعدادات', resetD: 'سيُحتفظ باسمك.', resetQ: 'إعادة كل الإعدادات إلى القيم الافتراضية؟',
+    donate: 'ادعم المشروع', donateD: 'الأداة مجانية، ودعمك البسيط يساعد على تطويرها.', donateBtn: 'ادعمني بقهوة',
+    source: 'الشفرة المصدرية', sourceD: 'مفتوحة المصدر على GitHub. نرحب بالأفكار والإبلاغ عن الأخطاء.', privacy: 'سياسة الخصوصية', open: 'فتح',
+  },
+};
+const s = k => (ST[LANG] && ST[LANG][k]) ?? ST.en[k] ?? k;
+
+/* ------------------------------------------------------------------ host */
+const pending = new Map(); let fid = 0;
+function hfetch(url) {
+  if (!host) return fetch(url).then(async r => ({ ok: r.ok, body: await r.text() })).catch(() => ({ ok: false, body: '' }));
+  return new Promise(res => { const id = ++fid; pending.set(id, res); post({ t: 'fetch', id, url }); setTimeout(() => { if (pending.has(id)) { pending.delete(id); res({ ok: false }); } }, 20000); });
+}
+async function hjson(url) { const r = await hfetch(url); if (!r.ok) return null; try { return JSON.parse(r.body); } catch { return null; } }
+if (host) host.addEventListener('message', e => {
+  const m = e.data; if (!m) return;
+  if (m.t === 'fetch') { const r = pending.get(m.id); if (r) { pending.delete(m.id); r(m); } }
+  if (m.t === 'init') { cfg = merge(DEFAULTS, m.data || {}); screens = m.screens || []; version = m.version || ''; links = m.links || {}; renderAll(); }
+  if (m.t === 'section') go(m.id);
+  if (m.t === 'picked') { cfg.adhan.file = m.file; cfg.adhan.fileLabel = m.label; cfg.adhan.sound = 'file'; save(); renderSec(); }
+});
+
+let saveT = 0;
+function save() { clearTimeout(saveT); saveT = setTimeout(() => post({ t: 'save', data: cfg }), 120); }
+
+/* ------------------------------------------------------------------ controls */
+const row = (label, desc, ctrl) => `<div class="row"><div class="rl"><b>${label}</b>${desc ? `<small>${desc}</small>` : ''}</div><div class="rc">${ctrl}</div></div>`;
+const toggle = k => `<input type="checkbox" class="sw" data-k="${k}" data-type="bool" ${getPath(cfg, k) ? 'checked' : ''}>`;
+const select = (k, opts, num) => `<select data-k="${k}" ${num ? 'data-type="num"' : ''}>${opts.map(([v, l]) => `<option value="${esc(v)}" ${String(getPath(cfg, k)) === String(v) ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>`;
+const seg = (k, opts, num) => `<div class="seg" data-k="${k}" ${num ? 'data-type="num"' : ''}>${opts.map(([v, l]) => `<button data-v="${esc(v)}" class="${String(getPath(cfg, k)) === String(v) ? 'on' : ''}">${esc(l)}</button>`).join('')}</div>`;
+const range = (k, min, max, step, suf = '') => `<input type="range" data-k="${k}" data-type="num" min="${min}" max="${max}" step="${step}" value="${getPath(cfg, k)}"><output data-for="${k}" data-suf="${suf}">${getPath(cfg, k)}${suf}</output>`;
+const num = (k, min, max) => `<input type="number" data-k="${k}" data-type="num" min="${min}" max="${max}" value="${getPath(cfg, k)}">`;
+const text = (k, ph = '', w = 220) => `<input type="text" data-k="${k}" placeholder="${esc(ph)}" value="${esc(getPath(cfg, k))}" style="width:${w}px">`;
+const card = (...rows) => `<div class="card">${rows.join('')}</div>`;
+const head = (title, lead) => `<h1>${title}</h1><p class="lead">${lead}</p>`;
+
+const ACCENTS = ['#8fdcff', '#7ef0c4', '#b9a4ff', '#ff9ec7', '#ffd27a', '#ff9f80', '#ffffff'];
+const GLASSES = [['#0c0e16', 'Midnight'], ['#06203a', 'Ocean'], ['#0b2419', 'Forest'], ['#24102e', 'Plum'], ['#2a1a0c', 'Amber'], ['#1d1d1f', 'Graphite']];
+
+/* ------------------------------------------------------------------ sections */
+const SECTIONS = [
+  ['general', '⚙️', () => head(s('general'), s('generalLead')) + card(
+    row(s('name'), s('nameD'), text('name', '', 200)),
+    row(s('lang'), '', seg('lang', [['en', 'English'], ['ar', 'العربية']])),
+    row(s('use24h'), '', toggle('use24h')),
+    row(s('secs'), '', toggle('showSeconds')),
+    row(s('autostart'), s('autostartD'), toggle('startWithWindows')))],
+
+  ['cards', '🧩', () => head(s('cards'), s('cardsLead')) + card(
+    ...[['hijri', 'cHijri'], ['prayer', 'cPrayer'], ['fx', 'cFx'], ['weather', 'cWeather'], ['world', 'cWorld'], ['events', 'cEvents'], ['focus', 'cFocus'], ['meet', 'cMeet'], ['media', 'cMedia']]
+      .map(([k, l]) => row(s(l), s(l + 'D'), toggle('cards.' + k))))],
+
+  ['prayer', '🕌', () => {
+    const L = cfg.location;
+    let loc = row(s('location'), s('locD'), seg('location.mode', [['auto', s('locAuto')], ['manual', s('locManual')]]));
+    if (L.mode === 'manual') {
+      loc += `<div class="row"><div class="rl"><input type="text" id="citySearch" placeholder="${s('searchPh')}" style="width:100%"></div><div class="rc"><button class="btn" data-act="city-search">${s('search')}</button></div></div>`;
+      if (cityBusy) loc += `<div class="hint">…</div>`;
+      else if (cityResults === null) loc += `<div class="hint">${s('noResults')}</div>`;
+      else if (cityResults.length) loc += `<div class="results">${cityResults.map((c, i) => `<button data-act="city-pick" data-i="${i}">${esc(c.name)}<small>${esc([c.admin1, c.country].filter(Boolean).join(', '))}</small></button>`).join('')}</div>`;
+      if (L.city) loc += `<div class="hint">${s('current')}: <span class="pill">📍 ${esc(L.city)}</span></div>`;
+    }
+    const methods = [['auto', s('methodAuto')], ...METHODS.map(m => [m[0], isAr() ? m[2] : m[1]])];
+    return head(s('prayer'), s('prayerLead')) + card(loc) + `<h2>${s('method')}</h2>` + card(
+      row(s('method'), '', select('prayer.method', methods)),
+      row(s('asr'), '', seg('prayer.school', [[0, s('asrStd')], [1, s('asrHanafi')]], true)),
+      row(s('remind'), s('remindD'), select('prayer.remindMin', [[0, s('off')], [5, '5 ' + s('min')], [10, '10 ' + s('min')], [15, '15 ' + s('min')], [20, '20 ' + s('min')], [30, '30 ' + s('min')]], true))) +
+      `<h2>${s('tune')}</h2>` + `<div class="card"><div class="hint">${s('tuneD')}</div><div class="tunes">` +
+      PRAYERS.map(p => `<label>${t(p)}${num('prayer.tune.' + p, -30, 30)}</label>`).join('') + `</div></div>`;
+  }],
+
+  ['adhan', '🔔', () => {
+    const a = cfg.adhan;
+    let snd = row(s('sound'), '', seg('adhan.sound', [['chime', s('sChime')], ['file', s('sFile')], ['none', s('sNone')]]));
+    if (a.sound === 'file') snd += row(a.fileLabel || s('noFile'), s('fileD'), `<button class="btn" data-act="pick">${s('choose')}</button>`);
+    if (a.sound !== 'none') snd += row(s('volume'), '', range('adhan.volume', 0, 100, 5, '%') + `<button class="btn" data-act="test">${s('test')}</button><button class="btn" data-act="test-stop">${s('stop')}</button>`);
+    return head(s('adhan'), s('adhanLead')) + card(row(s('adhanOn'), s('adhanOnD'), toggle('adhan.enabled')), snd) +
+      `<h2>${s('perPrayer')}</h2><div class="card"><div class="grid5">` + SALAH.map(p => `<label>${t(p)}${toggle('adhan.prayers.' + p)}</label>`).join('') + `</div></div>` +
+      `<h2>${s('iqama')}</h2><div class="card"><div class="hint">${s('iqamaD')}</div><div class="grid5">` + SALAH.map(p => `<label>${t(p)}${num('adhan.iqama.' + p, 0, 60)}</label>`).join('') + `</div></div>` +
+      `<h2>${s('ramadan')}</h2>` + card(row(s('ramadan'), s('ramadanD'), seg('ramadan', [['auto', s('rAuto')], ['on', s('rOn')], ['off', s('rOff')]])));
+  }],
+
+  ['currency', '💱', () => {
+    if (!currencies) { loadCurrencies(); return head(s('currency'), s('currencyLead')) + `<div class="card"><div class="hint">…</div></div>`; }
+    let dn = null; try { dn = new Intl.DisplayNames([LANG], { type: 'currency' }); } catch {}
+    const opts = currencies.map(c => [c, `${c} — ${dn ? dn.of(c) : c}`]);
+    const r = rates && rates[cfg.fx.quote] / rates[cfg.fx.base];
+    return head(s('currency'), s('currencyLead')) + card(
+      row(s('from'), '', select('fx.base', opts)),
+      row(s('to'), '', select('fx.quote', opts) + `<button class="btn" data-act="fx-swap">⇄ ${s('swap')}</button>`)) +
+      (r ? `<div class="card" style="margin-top:12px"><div class="preview" style="border:0"><b>1 ${cfg.fx.base} = ${r.toFixed(r >= 100 ? 2 : 4)} ${cfg.fx.quote}</b> · 1 ${cfg.fx.quote} = ${(1 / r).toFixed(1 / r >= 100 ? 2 : 4)} ${cfg.fx.base}</div></div>` : '');
+  }],
+
+  ['hijri', '🌙', () => {
+    const now = new Date();
+    return head(s('hijri'), s('hijriLead')) + card(
+      row(s('calendar'), '', select('hijri.calendar', [['islamic-umalqura', s('calUQ')], ['islamic', s('calIs')], ['islamic-civil', s('calCivil')], ['islamic-tbla', s('calTbla')]])),
+      row(s('hLang'), '', seg('hijri.lang', [['auto', s('hFollow')], ['ar', 'العربية'], ['en', 'English']])),
+      row(s('digits'), '', seg('hijri.digits', [['latn', '123'], ['arab', '١٢٣']])),
+      row(s('style'), '', seg('hijri.style', [['long', s('stLong')], ['weekday', s('stWeek')], ['short', s('stShort')], ['numeric', s('stNum')]])),
+      row(s('adjust'), s('adjustD'), seg('hijri.adjust', [[-2, '−2'], [-1, '−1'], [0, '0'], [1, '+1'], [2, '+2']], true)),
+      `<div class="preview">${s('preview')}: <b>${esc(hijriText(now, cfg.hijri))}</b></div>`);
+  }],
+
+  ['focus', '🎯', () => head(s('focus'), s('focusLead')) + card(
+    row(s('work'), '', num('focus.work', 1, 180) + `<span class="muted">${s('min')}</span>`),
+    row(s('brk'), '', num('focus.brk', 1, 60) + `<span class="muted">${s('min')}</span>`),
+    row(s('longBrk'), '', num('focus.longBrk', 1, 90) + `<span class="muted">${s('min')}</span>`),
+    row(s('every'), '', num('focus.every', 1, 12) + `<span class="muted">${s('sessions')}</span>`),
+    row(s('fSound'), '', toggle('focus.sound')))],
+
+  ['world', '🌍', () => {
+    fillTz();
+    const now = new Date();
+    const rows = cfg.world.map((z, i) => {
+      let time = ''; try { time = new Intl.DateTimeFormat(isAr() ? 'ar-u-nu-latn' : 'en-GB', { timeZone: z.tz, hour: 'numeric', minute: '2-digit', hour12: !cfg.use24h, weekday: 'short' }).format(now); } catch { time = '—'; }
+      return `<div class="listrow"><input class="grow" list="tzlist" data-list="world" data-i="${i}" data-f="tz" value="${esc(z.tz)}" placeholder="${s('zone')}">` +
+        `<input type="text" data-list="world" data-i="${i}" data-f="label" value="${esc(z.label)}" placeholder="${s('label')}" style="width:150px">` +
+        `<span class="pill" style="min-width:90px;text-align:center">${esc(time)}</span><button class="x" data-act="rm" data-list="world" data-i="${i}">✕</button></div>`;
+    }).join('');
+    return head(s('world'), s('worldLead')) + `<div class="card">${rows}${cfg.world.length < 3 ? `<div class="listrow"><button class="btn" data-act="add" data-list="world">+ ${s('add')}</button></div>` : ''}</div>`;
+  }],
+
+  ['events', '📅', () => {
+    const rows = cfg.events.map((e, i) =>
+      `<div class="listrow"><input type="text" class="emo" data-list="events" data-i="${i}" data-f="emoji" value="${esc(e.emoji || '')}" placeholder="📅">` +
+      `<input type="text" class="grow" data-list="events" data-i="${i}" data-f="title" value="${esc(e.title || '')}" placeholder="${s('title')}">` +
+      `<input type="date" data-list="events" data-i="${i}" data-f="date" value="${esc(e.date || '')}">` +
+      `<input type="time" data-list="events" data-i="${i}" data-f="time" value="${esc(e.time || '')}">` +
+      `<label class="muted" style="display:flex;gap:6px;align-items:center;font-size:12px"><input type="checkbox" class="sw" data-list="events" data-i="${i}" data-f="yearly" ${e.yearly ? 'checked' : ''}>${s('yearly')}</label>` +
+      `<button class="x" data-act="rm" data-list="events" data-i="${i}">✕</button></div>`).join('');
+    const occ = islamicOccasions(cfg.hijri).map(o => `<div class="listrow"><span>${o.emoji}</span><span class="grow">${t(o.k)}</span><span class="muted">${new Date(o.at).toLocaleDateString(gregLocale(), { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}</span></div>`).join('');
+    return head(s('events'), s('eventsLead')) + `<div class="card">${rows}<div class="listrow"><button class="btn" data-act="add" data-list="events">+ ${s('add')}</button></div></div>` +
+      `<h2>${s('islamicEv')}</h2>` + card(row(s('islamicEv'), s('islamicEvD'), toggle('islamicEvents'))) +
+      (cfg.islamicEvents ? `<h2>${s('upcoming')}</h2><div class="card">${occ}</div>` : '');
+  }],
+
+  ['meet', '📹', () => head(s('meet'), s('meetLead')) +
+    `<div class="card"><div class="row"><div class="rl"><b>${s('ical')}</b><small>${s('icalD')}</small></div></div>` +
+    `<div style="padding:0 14px 14px"><textarea id="ical" spellcheck="false" placeholder="https://calendar.google.com/calendar/ical/…/basic.ics">${esc(cfg.icalUrls.join('\n'))}</textarea></div></div>` +
+    `<h2>${s('how')}</h2><div class="card"><div class="hint"><ol><li>${s('how1')}</li><li>${s('how2')}</li><li>${s('how3')}</li><li>${s('how4')}</li></ol>🔒 ${s('icalPrivate')}</div></div>`],
+
+  ['look', '🎨', () => head(s('look'), s('lookLead')) + card(
+    row(s('accent'), '', `<div class="sws">${ACCENTS.map(c => `<button class="swatch ${cfg.accent === c ? 'on' : ''}" style="background:${c}" data-act="set" data-k="accent" data-v="${c}"></button>`).join('')}</div>`),
+    row(s('glass'), '', `<div class="sws">${GLASSES.map(([c, n]) => `<button class="swatch ${cfg.glass === c ? 'on' : ''}" title="${n}" style="background:${c}" data-act="set" data-k="glass" data-v="${c}"></button>`).join('')}</div>`),
+    row(s('tint'), s('tintD'), range('tint', 0, 80, 2))) +
+    `<h2>${s('position')}</h2>` + card(
+    row(s('position'), '', seg('position', [['left', s('pLeft')], ['center', s('pCenter')], ['right', s('pRight')]])),
+    row(s('monitor'), '', select('monitor', [['', s('mMain')], ...screens.filter(x => !x.primary).map(x => [x.id, x.name])])))],
+
+  ['about', 'ℹ️', () => head('Focus with a glance', s('aboutLead')) + card(
+    row(s('version'), '', `<span class="pill">${esc(version || '—')}</span>`),
+    links.donate ? row(s('donate'), s('donateD'), `<button class="btn" data-act="open" data-url="${esc(links.donate)}">☕ ${s('donateBtn')}</button>`) : '',
+    links.repo ? row(s('source'), s('sourceD'), `<button class="btn" data-act="open" data-url="${esc(links.repo)}">GitHub</button>`) : '',
+    links.privacy ? row(s('privacy'), '', `<button class="btn" data-act="open" data-url="${esc(links.privacy)}">${s('open')}</button>`) : '') +
+    `<h2>${s('services')}</h2><div class="card"><div class="hint">${s('svcD')}<ol>${[1, 2, 3, 4, 5, 6].map(i => `<li>${s('svc' + i)}</li>`).join('')}</ol></div></div>` +
+    `<h2>&nbsp;</h2>` + card(row(s('reset'), s('resetD'), `<button class="btn danger" data-act="reset">${s('reset')}</button>`))],
+];
+
+/* ------------------------------------------------------------------ rendering */
+function renderAll() {
+  LANG = cfg.lang === 'ar' ? 'ar' : 'en';
+  document.documentElement.lang = LANG; document.documentElement.dir = isAr() ? 'rtl' : 'ltr';
+  document.documentElement.style.setProperty('--acc', cfg.accent);
+  document.title = s('general');
+  $('#ver').textContent = version ? 'v' + version : '';
+  if (!SECTIONS.some(x => x[0] === cur)) cur = 'general';
+  $('#nav').innerHTML = SECTIONS.map(([id, ic]) => `<button data-nav="${id}" class="${id === cur ? 'on' : ''}"><span class="e">${ic}</span>${s(id)}</button>`).join('');
+  renderSec();
+}
+function renderSec() {
+  const sc = $('#main').scrollTop;
+  const sec = SECTIONS.find(x => x[0] === cur);
+  $('#sec').innerHTML = sec[2]();
+  $('#main').scrollTop = sc;
+}
+function go(id) { if (!SECTIONS.some(x => x[0] === id)) return; cur = id; $('#main').scrollTop = 0; renderAll(); }
+
+let tzFilled = false;
+function fillTz() {
+  if (tzFilled) return; tzFilled = true;
+  let z = []; try { z = Intl.supportedValuesOf('timeZone'); } catch {}
+  $('#tzlist').innerHTML = z.map(x => `<option value="${x}">${x.replace(/_/g, ' ')}</option>`).join('');
+}
+async function loadCurrencies() {
+  if (loadCurrencies.busy) return; loadCurrencies.busy = true;
+  const j = await hjson('https://open.er-api.com/v6/latest/USD');
+  rates = j && j.rates ? j.rates : { USD: 1, SAR: 3.75 };
+  currencies = Object.keys(rates).sort();
+  if (cur === 'currency') renderSec();
+}
+async function searchCity() {
+  const q = ($('#citySearch')?.value || '').trim(); if (!q) return;
+  cityBusy = true; renderSec();
+  const j = await hjson(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=8&language=${LANG}`);
+  cityBusy = false;
+  cityResults = j && j.results && j.results.length ? j.results : null;
+  renderSec();
+  const inp = $('#citySearch'); if (inp) inp.value = q;
+}
+
+/* ------------------------------------------------------------------ events */
+function conv(el, v) { return el.dataset.type === 'num' ? +v : el.dataset.type === 'bool' ? !!v : v; }
+document.addEventListener('click', e => {
+  const nb = e.target.closest('[data-nav]'); if (nb) { go(nb.dataset.nav); return; }
+  const sg = e.target.closest('.seg button');
+  if (sg) {
+    const box = sg.parentElement, k = box.dataset.k;
+    setPath(cfg, k, conv(box, sg.dataset.v)); save();
+    if (k === 'lang') renderAll(); else renderSec();
+    return;
+  }
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act;
+  if (a === 'set') { setPath(cfg, b.dataset.k, b.dataset.v); save(); renderAll(); }
+  if (a === 'city-search') searchCity();
+  if (a === 'city-pick') {
+    const c = cityResults[+b.dataset.i];
+    cfg.location = { mode: 'manual', city: c.name, lat: c.latitude, lon: c.longitude, cc: c.country_code || '' };
+    cityResults = []; save(); renderSec();
+  }
+  if (a === 'pick') post({ t: 'pick-sound' });
+  if (a === 'open') post({ t: 'open', url: b.dataset.url });
+  if (a === 'test') testSound();
+  if (a === 'test-stop') stopTest();
+  if (a === 'fx-swap') { const x = cfg.fx.base; cfg.fx.base = cfg.fx.quote; cfg.fx.quote = x; save(); renderSec(); }
+  if (a === 'add') {
+    const L = b.dataset.list;
+    if (L === 'world') cfg.world.push({ tz: '', label: '' });
+    if (L === 'events') cfg.events.push({ emoji: '', title: '', date: '', time: '', yearly: false });
+    save(); renderSec();
+    const ins = document.querySelectorAll(`[data-list="${L}"][data-f="${L === 'world' ? 'tz' : 'title'}"]`); ins[ins.length - 1]?.focus();
+  }
+  if (a === 'rm') { cfg[b.dataset.list].splice(+b.dataset.i, 1); save(); renderSec(); }
+  if (a === 'reset') {
+    if (!confirm(s('resetQ'))) return;
+    const keep = { name: cfg.name, lang: cfg.lang, icalUrls: cfg.icalUrls };
+    cfg = merge(DEFAULTS, keep); save(); renderAll();
+  }
+});
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (el.dataset.list) { listSet(el); renderSec(); return; }
+  if (!el.dataset.k) return;
+  const v = el.type === 'checkbox' ? el.checked : el.value;
+  setPath(cfg, el.dataset.k, conv(el, v)); save();
+  if (el.tagName === 'SELECT' || el.type === 'checkbox') {
+    if (el.dataset.k.startsWith('fx.') && cfg.fx.base === cfg.fx.quote) { /* allowed but pointless */ }
+    renderSec();
+  }
+});
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.id === 'ical') { cfg.icalUrls = el.value.split(/\r?\n/).map(x => x.trim()).filter(Boolean); save(); return; }
+  if (el.dataset.list) { listSet(el); return; }
+  if (!el.dataset.k || el.type === 'checkbox' || el.tagName === 'SELECT') return;
+  if (el.type === 'number' && el.value === '') return;
+  let v = conv(el, el.value);
+  if (el.type === 'number') { v = Math.max(+el.min, Math.min(+el.max, v)); }
+  setPath(cfg, el.dataset.k, v); save();
+  const out = document.querySelector(`output[data-for="${el.dataset.k}"]`); if (out) out.textContent = el.value + (out.dataset.suf || '');
+});
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'citySearch') searchCity(); });
+function listSet(el) {
+  const arr = cfg[el.dataset.list], item = arr[+el.dataset.i]; if (!item) return;
+  item[el.dataset.f] = el.type === 'checkbox' ? el.checked : el.value;
+  save();
+}
+
+let testAudio = null;
+function testSound() {
+  stopTest();
+  const a = cfg.adhan;
+  if (a.sound === 'file' && a.file) {
+    testAudio = new Audio('https://sounds.glance.local/' + encodeURIComponent(a.file) + '?v=' + Date.now());
+    testAudio.volume = a.volume / 100; testAudio.play().catch(() => {});
+  } else chime(a.volume / 100, 'adhan');
+}
+function stopTest() { if (testAudio) { testAudio.pause(); testAudio = null; } if (chime.ac) { chime.ac.close(); chime.ac = null; } }
+
+renderAll();
+post({ t: 'ready' });
+</script>
+</body>
+</html>
