@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.2.1
+
+- Fixed: after an adhan with an iqama countdown, the widget stayed on the prayer card instead of returning to the
+  clock (so the weather icon beside the clock never came back)
+
 ## 2.2.0
 
 - First run starts with a language choice: **English, العربية or 中文** (full Chinese translation)

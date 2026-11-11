@@ -10,7 +10,7 @@
     <AssemblyName>Focus-with-a-glance</AssemblyName>
     <RootNamespace>FocusGlance</RootNamespace>
     <Product>Focus with a glance</Product>
-    <Version>2.2.0</Version>
+    <Version>2.2.1</Version>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <ApplicationIcon>app.ico</ApplicationIcon>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
