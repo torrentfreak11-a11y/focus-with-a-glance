@@ -201,6 +201,10 @@ static class Licenses
 
     public static async Task<bool> HasPharaohAsync(IntPtr owner)
     {
+#if OWNER
+        await Task.CompletedTask;
+        return true;   // the developer's own copy (built with -p:OwnerBuild=true), never published
+#endif
 #if DEBUG
         if (Environment.GetEnvironmentVariable("FOCUSGLANCE_PHARAOH") == "1") return true;
 #endif

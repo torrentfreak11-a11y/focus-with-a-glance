@@ -1157,6 +1157,8 @@ function prayerTick(now) {
   if (r && r.phase === 'iftar' && r.at - now < 30 * 60e3 && !S.fired.has('ift' + day)) { S.fired.add('ift' + day); autoSwitch('ramadan'); }
 }
 function prayerHot(now) {
+  // the iqama countdown keeps the prayer card up only until iqama time; then let the clock come back
+  if (S.iqama && now >= S.iqama.at) S.iqama = null;
   if (S.iqama) return true;
   const n = nextPrayer(), rm = cfg.prayer.remindMin * 60e3;
   return !!(n && rm > 0 && n.at - now <= rm);

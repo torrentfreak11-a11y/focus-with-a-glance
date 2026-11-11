@@ -22,6 +22,11 @@
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
 
+  <!-- The developer's own copy: dotnet publish -p:OwnerBuild=true (everything unlocked). Never used for releases. -->
+  <PropertyGroup Condition="'$(OwnerBuild)' == 'true'">
+    <DefineConstants>$(DefineConstants);OWNER</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
     <PackageReference Include="Ical.Net" Version="4.2.0" />
