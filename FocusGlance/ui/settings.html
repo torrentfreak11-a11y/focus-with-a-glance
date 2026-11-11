@@ -106,18 +106,18 @@ const $ = s => document.querySelector(s);
 const host = window.chrome && window.chrome.webview;
 const post = m => { if (host) host.postMessage(m); };
 
-let cfg = merge(DEFAULTS, {}), screens = [], version = '', links = {}, cur = (location.hash || '#general').slice(1);
+let cfg = merge(DEFAULTS, {}), screens = [], version = '', links = {}, lic = { pharaoh: false, store: false }, cur = (location.hash || '#general').slice(1);
 let currencies = null, rates = null, cityResults = [], cityBusy = false;
 
 /* ------------------------------------------------------------------ strings */
 const ST = {
   en: {
-    general: 'General', cards: 'Cards', prayer: 'Prayer times', adhan: 'Adhan & Ramadan', currency: 'Currency', hijri: 'Hijri date',
+    general: 'General', cards: 'Cards', prayer: 'Prayer times', adhan: 'Adhan & Ramadan', currency: 'Currency', hijri: 'Calendars',
     focus: 'Focus timer', world: 'World clock', events: 'Countdown', meet: 'Google Meet', look: 'Look & position', about: 'About',
     generalLead: 'Your name, language and clock.', name: 'Your name', nameD: 'Shown in the greeting when Windows starts.',
     lang: 'Language', use24h: '24-hour clock', secs: 'Show seconds', autostart: 'Start with Windows', autostartD: 'Open the widget when you sign in.',
     cardsLead: 'Choose which cards appear when you use the arrows in the full widget. The clock is always there.',
-    cHijri: 'Hijri date', cHijriD: 'Today in the Islamic calendar.', cPrayer: 'Prayer times', cPrayerD: 'Next prayer, with all of today’s times.',
+    cHijri: 'Second calendar', cHijriD: 'Today in your second calendar.', cPrayer: 'Prayer times', cPrayerD: 'Next prayer, with all of today’s times.',
     cFx: 'Exchange rate', cFxD: 'Live rate and a quick converter.', cWeather: 'Weather', cWeatherD: 'Current conditions in °C.',
     cWorld: 'World clock', cWorldD: 'Up to three other time zones.', cEvents: 'Countdown', cEventsD: 'Days left to dates you care about.',
     cFocus: 'Focus timer', cFocusD: 'Pomodoro sessions with breaks.', cMeet: 'Google Meet', cMeetD: 'Countdown for timed meetings.',
@@ -151,7 +151,7 @@ const ST = {
     how3: 'Scroll to “Integrate calendar” and copy “Secret address in iCal format”.', how4: 'Paste it here. Repeat for each Google account.',
     icalPrivate: 'Keep these links private: anyone with them can read your calendar. They are stored only on this PC.',
     lookLead: 'Make the glass yours.', accent: 'Accent color', glass: 'Glass color', tint: 'Glass tint', tintD: 'Lower is clearer, higher is easier to read.',
-    position: 'Position', pCenter: 'Top center', pLeft: 'Top left', pRight: 'Top right', monitor: 'Display', mMain: 'Main display',
+    position: 'Position', pCenter: 'Top center', pLeft: 'Top left', pRight: 'Top right', pTaskbar: 'In the taskbar', monitor: 'Display', mMain: 'Main display',
     aboutLead: 'A liquid-glass notch widget for Windows.', version: 'Version', services: 'Online services used',
     svcD: 'The widget talks directly to these free services. No account, no tracking, nothing is sent anywhere else.',
     svc1: 'Approximate location (ipwho.is / ipapi.co) — only when Location is set to auto-detect',
@@ -160,14 +160,79 @@ const ST = {
     reset: 'Reset all settings', resetD: 'Your name is kept.', resetQ: 'Reset every setting to its default?',
     donate: 'Support the project', donateD: 'Focus with a glance is free. A small tip keeps it growing.', donateBtn: 'Buy me a coffee',
     source: 'Source code', sourceD: 'Open source on GitHub. Ideas and bug reports are welcome.', privacy: 'Privacy policy', open: 'Open',
+    calendars: 'Calendars', calLead: 'Your main calendar and a second one shown beside it.', primaryCal: 'Main calendar', extraCal: 'Second calendar',
+    calNone: 'None', calgregory: 'Gregorian', calislamic: 'Hijri', calchinese: 'Chinese', calcoptic: 'Coptic', hijriOpts: 'Hijri options',
+    behavior: 'Behavior', compactWx: 'Weather beside the clock', compactWxD: 'An animated sun, moon, cloud or rain next to the time.',
+    autoHide: 'Hide during games and full-screen video', autoHideD: 'The notch fades away and comes back when you leave full screen.',
+    btOverlay: 'Bluetooth devices', btOverlayD: 'Show the device name, battery and volume when headphones or other devices connect.',
+    theme: 'Theme', thGlass: 'Liquid glass', thPharaoh: 'Pharaonic', glyphs: 'Hieroglyphs', glyphsD: 'Decorative hieroglyphs beside English, and your name in a cartouche.',
+    pharaohPack: 'Pharaonic pack', pharaohD: 'Coptic calendar, a lapis-and-gold Pharaonic theme, hieroglyph decorations and your name in a cartouche.',
+    buy: 'Get it', owned: 'Unlocked — thank you!', inStore: 'Available in the Microsoft Store version.', locked: '🔒',
+  },
+  zh: {
+    general: '常规', cards: '卡片', prayer: '礼拜时间', adhan: '宣礼与斋月', currency: '货币', hijri: '日历',
+    focus: '专注计时', world: '世界时钟', events: '倒计时', meet: 'Google Meet', look: '外观与位置', about: '关于',
+    generalLead: '你的名字、语言和时钟。', name: '你的名字', nameD: 'Windows 启动时在问候中显示。',
+    lang: '语言', use24h: '24 小时制', secs: '显示秒', autostart: '开机启动', autostartD: '登录时打开小组件。',
+    cardsLead: '选择在完整视图中用箭头切换的卡片。时钟始终存在。',
+    cHijri: '第二日历', cHijriD: '今天在第二种日历中的日期。', cPrayer: '礼拜时间', cPrayerD: '下一次礼拜及今天的全部时间。',
+    cFx: '汇率', cFxD: '实时汇率和快速换算。', cWeather: '天气', cWeatherD: '当前天气（°C）。',
+    cWorld: '世界时钟', cWorldD: '最多三个其他时区。', cEvents: '倒计时', cEventsD: '距离重要日子的天数。',
+    cFocus: '专注计时', cFocusD: '番茄钟与休息。', cMeet: 'Google Meet', cMeetD: '定时会议倒计时。',
+    cMedia: '媒体播放器', cMediaD: '播放音乐或视频时出现。',
+    prayerLead: '礼拜时间由 Aladhan 服务根据你的位置计算。',
+    location: '位置', locAuto: '自动检测', locManual: '选择城市', locD: '自动检测使用网络连接的大致位置。',
+    search: '搜索', searchPh: '输入城市名称…', current: '当前', noResults: '未找到城市。',
+    method: '计算方法', methodAuto: '自动（按国家）', asr: '晡礼时间', asrStd: '标准', asrHanafi: '哈乃斐',
+    remind: '宣礼前提醒', remindD: '刘海会倒计时到下一次礼拜。', off: '关闭', min: '分钟',
+    tune: '微调（分钟）', tuneD: '将每个时间提前或推后几分钟，以匹配当地清真寺。',
+    adhanLead: '每次礼拜时间到达时提醒，然后倒计时到起拜。',
+    adhanOn: '礼拜时间提醒', adhanOnD: '刘海落下液态提醒并播放声音。',
+    sound: '声音', sChime: '柔和铃声', sFile: '我的宣礼音频', sNone: '静音', choose: '选择文件…', noFile: '未选择文件',
+    fileD: '选择任意宣礼录音（mp3、m4a、wav）。', volume: '音量', test: '试听', stop: '停止',
+    perPrayer: '提醒的礼拜', iqama: '宣礼后起拜（分钟）', iqamaD: '设为 0 可跳过起拜倒计时。',
+    ramadan: '斋月模式', ramadanD: '开斋和封斋饭倒计时，以及斋戒第几天。', rAuto: '自动', rOn: '始终开启', rOff: '关闭',
+    currencyLead: '选择小组件显示的两种货币。汇率每隔几小时更新。',
+    from: '从', to: '到', swap: '互换',
+    hijriLead: '选择伊斯兰历的计算和书写方式。',
+    calendar: '历法', calUQ: '乌姆古拉（沙特阿拉伯）', calIs: '天文', calCivil: '民用（表格）', calTbla: '表格（周四纪元）',
+    hLang: '语言', hFollow: '跟随应用', digits: '数字', style: '样式', stLong: '完整', stWeek: '含星期', stShort: '日和月', stNum: '数字',
+    adjust: '调整天数', adjustD: '前后移动一天以匹配当地新月观测。', preview: '预览',
+    focusLead: '以专注时段加短暂休息的方式工作。从专注卡片开始。',
+    work: '专注时长', brk: '短休息', longBrk: '长休息', every: '长休息间隔', sessions: '轮', fSound: '时段结束时播放声音',
+    worldLead: '最多添加三个地点。输入以搜索时区，例如 “London”。', zone: '时区', label: '名称（可选）', add: '添加',
+    eventsLead: '为旅行、生日或任何日子倒计时。', title: '标题', yearly: '每年',
+    islamicEv: '伊斯兰节日', islamicEvD: '斋月、开斋节、阿拉法特日、古尔邦节和伊斯兰新年。', upcoming: '即将到来',
+    meetLead: '为任意数量的 Google 帐户中的定时 Google Meet 会议倒计时。',
+    ical: '私密 iCal 链接', icalD: '每行一个链接，每个帐户一个。',
+    how: '如何获取链接', how1: '在网页版 Google 日历中打开“设置”。', how2: '在“我的日历的设置”中选择你的日历。',
+    how3: '滚动到“集成日历”，复制“iCal 格式的私密地址”。', how4: '粘贴到这里。每个 Google 帐户重复一次。',
+    icalPrivate: '请勿泄露这些链接：拿到链接的人可以读取你的日历。它们只保存在这台电脑上。',
+    lookLead: '打造属于你的玻璃。', accent: '强调色', glass: '玻璃颜色', tint: '玻璃浓度', tintD: '越低越通透，越高越易读。',
+    position: '位置', pCenter: '顶部居中', pLeft: '左上角', pRight: '右上角', pTaskbar: '任务栏中', monitor: '显示器', mMain: '主显示器',
+    aboutLead: '一款液态玻璃风格的 Windows 刘海小组件。', version: '版本', services: '使用的在线服务',
+    svcD: '小组件直接连接这些免费服务。无需帐户，无跟踪，不向其他地方发送任何内容。',
+    svc1: '大致位置（ipwho.is / ipapi.co）——仅在位置设为自动检测时', svc2: '礼拜时间（aladhan.com）', svc3: '天气和城市搜索（open-meteo.com）', svc4: '汇率（open.er-api.com）',
+    svc5: '歌词（lrclib.net）', svc6: '你添加的 Google 日历 iCal 链接',
+    reset: '重置所有设置', resetD: '会保留你的名字。', resetQ: '将所有设置恢复为默认值？',
+    donate: '支持本项目', donateD: 'Focus with a glance 是免费的。一点小小的支持能让它继续成长。', donateBtn: '请我喝杯咖啡',
+    source: '源代码', sourceD: '在 GitHub 上开源。欢迎提出想法和反馈问题。', privacy: '隐私政策', open: '打开',
+    calendars: '日历', calLead: '你的主日历，以及显示在旁边的第二种日历。', primaryCal: '主日历', extraCal: '第二日历',
+    calNone: '无', calgregory: '公历', calislamic: '伊斯兰历', calchinese: '农历', calcoptic: '科普特历', hijriOpts: '伊斯兰历选项',
+    behavior: '行为', compactWx: '时钟旁显示天气', compactWxD: '时间旁边会出现动态的太阳、月亮、云或雨。',
+    autoHide: '游戏和全屏视频时隐藏', autoHideD: '刘海会淡出，退出全屏后再回来。',
+    btOverlay: '蓝牙设备', btOverlayD: '耳机或其他设备连接时，显示设备名称、电量和音量。',
+    theme: '主题', thGlass: '液态玻璃', thPharaoh: '法老', glyphs: '象形文字', glyphsD: '在英文旁加入装饰性象形文字，并把你的名字写进王名圈。',
+    pharaohPack: '法老扩展包', pharaohD: '科普特历、青金石与黄金的法老主题、象形文字装饰，以及写进王名圈的名字。',
+    buy: '获取', owned: '已解锁——谢谢你！', inStore: '在 Microsoft Store 版本中提供。', locked: '🔒',
   },
   ar: {
-    general: 'عام', cards: 'البطاقات', prayer: 'أوقات الصلاة', adhan: 'الأذان ورمضان', currency: 'العملات', hijri: 'التاريخ الهجري',
+    general: 'عام', cards: 'البطاقات', prayer: 'أوقات الصلاة', adhan: 'الأذان ورمضان', currency: 'العملات', hijri: 'التقاويم',
     focus: 'مؤقت التركيز', world: 'الساعة العالمية', events: 'العد التنازلي', meet: 'Google Meet', look: 'المظهر والموضع', about: 'حول',
     generalLead: 'اسمك ولغتك وإعدادات الساعة.', name: 'اسمك', nameD: 'يظهر في الترحيب عند بدء Windows.',
     lang: 'اللغة', use24h: 'نظام 24 ساعة', secs: 'إظهار الثواني', autostart: 'التشغيل مع Windows', autostartD: 'فتح الأداة عند تسجيل الدخول.',
     cardsLead: 'اختر البطاقات التي تظهر عند التنقل بالأسهم في الأداة الكاملة. الساعة موجودة دائماً.',
-    cHijri: 'التاريخ الهجري', cHijriD: 'تاريخ اليوم بالتقويم الهجري.', cPrayer: 'أوقات الصلاة', cPrayerD: 'الصلاة القادمة مع جميع أوقات اليوم.',
+    cHijri: 'التقويم الثاني', cHijriD: 'تاريخ اليوم في تقويمك الثاني.', cPrayer: 'أوقات الصلاة', cPrayerD: 'الصلاة القادمة مع جميع أوقات اليوم.',
     cFx: 'سعر الصرف', cFxD: 'السعر الحالي مع محوّل سريع.', cWeather: 'الطقس', cWeatherD: 'الحالة الحالية بالدرجة المئوية.',
     cWorld: 'الساعة العالمية', cWorldD: 'حتى ثلاث مناطق زمنية أخرى.', cEvents: 'العد التنازلي', cEventsD: 'الأيام المتبقية لمواعيدك المهمة.',
     cFocus: 'مؤقت التركيز', cFocusD: 'جلسات بومودورو مع استراحات.', cMeet: 'Google Meet', cMeetD: 'عد تنازلي للاجتماعات المجدولة.',
@@ -201,7 +266,7 @@ const ST = {
     how3: 'انزل إلى “دمج التقويم” وانسخ “العنوان السري بتنسيق iCal”.', how4: 'الصقه هنا. كرر ذلك لكل حساب Google.',
     icalPrivate: 'احتفظ بهذه الروابط لنفسك: من يملكها يستطيع قراءة تقويمك. تُحفظ على هذا الجهاز فقط.',
     lookLead: 'اجعل الزجاج على ذوقك.', accent: 'لون التمييز', glass: 'لون الزجاج', tint: 'عتامة الزجاج', tintD: 'الأقل أوضح، والأعلى أسهل للقراءة.',
-    position: 'الموضع', pCenter: 'أعلى الوسط', pLeft: 'أعلى اليسار', pRight: 'أعلى اليمين', monitor: 'الشاشة', mMain: 'الشاشة الرئيسية',
+    position: 'الموضع', pCenter: 'أعلى الوسط', pLeft: 'أعلى اليسار', pRight: 'أعلى اليمين', pTaskbar: 'في شريط المهام', monitor: 'الشاشة', mMain: 'الشاشة الرئيسية',
     aboutLead: 'أداة شريط زجاجي سائل لنظام Windows.', version: 'الإصدار', services: 'الخدمات المستخدمة عبر الإنترنت',
     svcD: 'تتصل الأداة مباشرة بهذه الخدمات المجانية. بلا حساب وبلا تتبع، ولا يُرسل شيء إلى أي مكان آخر.',
     svc1: 'الموقع التقريبي (ipwho.is / ipapi.co) — فقط عند اختيار التحديد التلقائي',
@@ -210,6 +275,14 @@ const ST = {
     reset: 'إعادة ضبط كل الإعدادات', resetD: 'سيُحتفظ باسمك.', resetQ: 'إعادة كل الإعدادات إلى القيم الافتراضية؟',
     donate: 'ادعم المشروع', donateD: 'الأداة مجانية، ودعمك البسيط يساعد على تطويرها.', donateBtn: 'ادعمني بقهوة',
     source: 'الشفرة المصدرية', sourceD: 'مفتوحة المصدر على GitHub. نرحب بالأفكار والإبلاغ عن الأخطاء.', privacy: 'سياسة الخصوصية', open: 'فتح',
+    calendars: 'التقاويم', calLead: 'تقويمك الأساسي وتقويم ثانٍ يظهر بجانبه.', primaryCal: 'التقويم الأساسي', extraCal: 'التقويم الثاني',
+    calNone: 'بدون', calgregory: 'الميلادي', calislamic: 'الهجري', calchinese: 'الصيني', calcoptic: 'القبطي', hijriOpts: 'خيارات التاريخ الهجري',
+    behavior: 'السلوك', compactWx: 'الطقس بجانب الساعة', compactWxD: 'شمس أو قمر أو غيوم أو مطر متحركة بجانب الوقت.',
+    autoHide: 'الإخفاء أثناء الألعاب والفيديو بملء الشاشة', autoHideD: 'يختفي الشريط بهدوء ويعود عند الخروج من ملء الشاشة.',
+    btOverlay: 'أجهزة البلوتوث', btOverlayD: 'عرض اسم الجهاز والبطارية ومستوى الصوت عند توصيل السماعات أو غيرها.',
+    theme: 'المظهر', thGlass: 'زجاج سائل', thPharaoh: 'فرعوني', glyphs: 'الهيروغليفية', glyphsD: 'زخارف هيروغليفية بجانب الإنجليزية، واسمك داخل خرطوش.',
+    pharaohPack: 'الباقة الفرعونية', pharaohD: 'التقويم القبطي، ومظهر فرعوني باللازورد والذهب، وزخارف هيروغليفية، واسمك داخل خرطوش.',
+    buy: 'احصل عليها', owned: 'مفعّلة — شكراً لك!', inStore: 'متاحة في نسخة متجر Microsoft.', locked: '🔒',
   },
 };
 const s = k => (ST[LANG] && ST[LANG][k]) ?? ST.en[k] ?? k;
@@ -224,7 +297,7 @@ async function hjson(url) { const r = await hfetch(url); if (!r.ok) return null;
 if (host) host.addEventListener('message', e => {
   const m = e.data; if (!m) return;
   if (m.t === 'fetch') { const r = pending.get(m.id); if (r) { pending.delete(m.id); r(m); } }
-  if (m.t === 'init') { cfg = merge(DEFAULTS, m.data || {}); screens = m.screens || []; version = m.version || ''; links = m.links || {}; renderAll(); }
+  if (m.t === 'init') { cfg = merge(DEFAULTS, m.data || {}); screens = m.screens || []; version = m.version || ''; links = m.links || {}; lic = { pharaoh: !!m.pharaoh, store: !!m.store }; renderAll(); }
   if (m.t === 'section') go(m.id);
   if (m.t === 'picked') { cfg.adhan.file = m.file; cfg.adhan.fileLabel = m.label; cfg.adhan.sound = 'file'; save(); renderSec(); }
 });
@@ -236,7 +309,8 @@ function save() { clearTimeout(saveT); saveT = setTimeout(() => post({ t: 'save'
 const row = (label, desc, ctrl) => `<div class="row"><div class="rl"><b>${label}</b>${desc ? `<small>${desc}</small>` : ''}</div><div class="rc">${ctrl}</div></div>`;
 const toggle = k => `<input type="checkbox" class="sw" data-k="${k}" data-type="bool" ${getPath(cfg, k) ? 'checked' : ''}>`;
 const select = (k, opts, num) => `<select data-k="${k}" ${num ? 'data-type="num"' : ''}>${opts.map(([v, l]) => `<option value="${esc(v)}" ${String(getPath(cfg, k)) === String(v) ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>`;
-const seg = (k, opts, num) => `<div class="seg" data-k="${k}" ${num ? 'data-type="num"' : ''}>${opts.map(([v, l]) => `<button data-v="${esc(v)}" class="${String(getPath(cfg, k)) === String(v) ? 'on' : ''}">${esc(l)}</button>`).join('')}</div>`;
+// an option's third value marks it as part of the Pharaonic pack
+const seg = (k, opts, num) => `<div class="seg" data-k="${k}" ${num ? 'data-type="num"' : ''}>${opts.map(([v, l, lk]) => `<button data-v="${esc(v)}" ${lk ? 'data-lock="1"' : ''} class="${String(getPath(cfg, k)) === String(v) ? 'on' : ''}">${esc(l)}${lk && !lic.pharaoh ? ' 🔒' : ''}</button>`).join('')}</div>`;
 const range = (k, min, max, step, suf = '') => `<input type="range" data-k="${k}" data-type="num" min="${min}" max="${max}" step="${step}" value="${getPath(cfg, k)}"><output data-for="${k}" data-suf="${suf}">${getPath(cfg, k)}${suf}</output>`;
 const num = (k, min, max) => `<input type="number" data-k="${k}" data-type="num" min="${min}" max="${max}" value="${getPath(cfg, k)}">`;
 const text = (k, ph = '', w = 220) => `<input type="text" data-k="${k}" placeholder="${esc(ph)}" value="${esc(getPath(cfg, k))}" style="width:${w}px">`;
@@ -247,13 +321,28 @@ const ACCENTS = ['#8fdcff', '#7ef0c4', '#b9a4ff', '#ff9ec7', '#ffd27a', '#ff9f80
 const GLASSES = [['#0c0e16', 'Midnight'], ['#06203a', 'Ocean'], ['#0b2419', 'Forest'], ['#24102e', 'Plum'], ['#2a1a0c', 'Amber'], ['#1d1d1f', 'Graphite']];
 
 /* ------------------------------------------------------------------ sections */
+// Pharaonic pack: owned → thanks; Store build → buy button; GitHub build → where to get it
+const packCard = () => `<div class="card"><div class="row"><div class="rl"><b>𓋹 ${s('pharaohPack')}</b><small>${s('pharaohD')}</small></div><div class="rc">` +
+  (lic.pharaoh ? `<span class="pill">✓ ${s('owned')}</span>` : lic.store ? `<button class="btn pri" data-act="buy">${s('buy')} · $0.99</button>` : `<span class="muted" style="font-size:12px;white-space:normal;max-width:220px;text-align:end">${s('inStore')}</span>`) +
+  `</div></div></div>`;
+const hijriCard = now => card(
+  row(s("calendar"), "", select("hijri.calendar", [["islamic-umalqura", s("calUQ")], ["islamic", s("calIs")], ["islamic-civil", s("calCivil")], ["islamic-tbla", s("calTbla")]])),
+  row(s("hLang"), "", seg("hijri.lang", [["auto", s("hFollow")], ["ar", "العربية"], ["en", "English"], ["zh", "中文"]])),
+  row(s("digits"), "", seg("hijri.digits", [["latn", "123"], ["arab", "١٢٣"]])),
+  row(s("style"), "", seg("hijri.style", [["long", s("stLong")], ["weekday", s("stWeek")], ["short", s("stShort")], ["numeric", s("stNum")]])),
+  row(s("adjust"), s("adjustD"), seg("hijri.adjust", [[-2, "−2"], [-1, "−1"], [0, "0"], [1, "+1"], [2, "+2"]], true)),
+  `<div class="preview">${s("preview")}: <b>${esc(hijriText(now, cfg.hijri))}</b></div>`);
 const SECTIONS = [
   ['general', '⚙️', () => head(s('general'), s('generalLead')) + card(
     row(s('name'), s('nameD'), text('name', '', 200)),
-    row(s('lang'), '', seg('lang', [['en', 'English'], ['ar', 'العربية']])),
+    row(s('lang'), '', seg("lang", LANGS)),
     row(s('use24h'), '', toggle('use24h')),
     row(s('secs'), '', toggle('showSeconds')),
-    row(s('autostart'), s('autostartD'), toggle('startWithWindows')))],
+    row(s('autostart'), s('autostartD'), toggle('startWithWindows'))) +
+    `<h2>${s("behavior")}</h2>` + card(
+    row(s("compactWx"), s("compactWxD"), toggle("compactWeather")),
+    row(s("autoHide"), s("autoHideD"), toggle("autoHide")),
+    row(s("btOverlay"), s("btOverlayD"), toggle("btOverlay")))],
 
   ['cards', '🧩', () => head(s('cards'), s('cardsLead')) + card(
     ...[['hijri', 'cHijri'], ['prayer', 'cPrayer'], ['fx', 'cFx'], ['weather', 'cWeather'], ['world', 'cWorld'], ['events', 'cEvents'], ['focus', 'cFocus'], ['meet', 'cMeet'], ['media', 'cMedia']]
@@ -300,15 +389,16 @@ const SECTIONS = [
       (r ? `<div class="card" style="margin-top:12px"><div class="preview" style="border:0"><b>1 ${cfg.fx.base} = ${r.toFixed(r >= 100 ? 2 : 4)} ${cfg.fx.quote}</b> · 1 ${cfg.fx.quote} = ${(1 / r).toFixed(1 / r >= 100 ? 2 : 4)} ${cfg.fx.base}</div></div>` : '');
   }],
 
-  ['hijri', '🌙', () => {
-    const now = new Date();
-    return head(s('hijri'), s('hijriLead')) + card(
-      row(s('calendar'), '', select('hijri.calendar', [['islamic-umalqura', s('calUQ')], ['islamic', s('calIs')], ['islamic-civil', s('calCivil')], ['islamic-tbla', s('calTbla')]])),
-      row(s('hLang'), '', seg('hijri.lang', [['auto', s('hFollow')], ['ar', 'العربية'], ['en', 'English']])),
-      row(s('digits'), '', seg('hijri.digits', [['latn', '123'], ['arab', '١٢٣']])),
-      row(s('style'), '', seg('hijri.style', [['long', s('stLong')], ['weekday', s('stWeek')], ['short', s('stShort')], ['numeric', s('stNum')]])),
-      row(s('adjust'), s('adjustD'), seg('hijri.adjust', [[-2, '−2'], [-1, '−1'], [0, '0'], [1, '+1'], [2, '+2']], true)),
-      `<div class="preview">${s('preview')}: <b>${esc(hijriText(now, cfg.hijri))}</b></div>`);
+  ['hijri', '📅', () => {
+    const now = new Date(), c = cfg.calendar;
+    const cals = [['gregory', s('calgregory')], ['islamic', s('calislamic')], ['chinese', s('calchinese')], ['coptic', s('calcoptic'), 1]];
+    const usesHijri = c.primary === 'islamic' || c.extra === 'islamic' || cfg.cards.prayer;
+    const pv = cal => cal === 'none' ? '—' : esc(calText(now, cal, cfg, 'weekday'));
+    return head(s('calendars'), s('calLead')) + card(
+      row(s('primaryCal'), '', seg('calendar.primary', cals.filter(x => x[0] !== 'islamic'))),
+      row(s('extraCal'), '', seg('calendar.extra', [['none', s('calNone')], ...cals])),
+      `<div class="preview">${s('preview')}: <b>${pv(c.primary)}</b>${c.extra !== 'none' && c.extra !== c.primary ? ` · <b>${pv(c.extra)}</b>` : ''}</div>`) +
+      (usesHijri ? `<h2>${s('hijriOpts')}</h2>` + hijriCard(now) : '');
   }],
 
   ['focus', '🎯', () => head(s('focus'), s('focusLead')) + card(
@@ -350,12 +440,15 @@ const SECTIONS = [
     `<h2>${s('how')}</h2><div class="card"><div class="hint"><ol><li>${s('how1')}</li><li>${s('how2')}</li><li>${s('how3')}</li><li>${s('how4')}</li></ol>🔒 ${s('icalPrivate')}</div></div>`],
 
   ['look', '🎨', () => head(s('look'), s('lookLead')) + card(
-    row(s('accent'), '', `<div class="sws">${ACCENTS.map(c => `<button class="swatch ${cfg.accent === c ? 'on' : ''}" style="background:${c}" data-act="set" data-k="accent" data-v="${c}"></button>`).join('')}</div>`),
+    row(s('theme'), '', seg('theme', [['glass', s('thGlass')], ['pharaoh', '𓋹 ' + s('thPharaoh'), 1]])),
+    cfg.theme === 'pharaoh' && lic.pharaoh ? row(s('glyphs'), s('glyphsD'), toggle('glyphs')) : '',
+    row(s('accent'), '',`<div class="sws">${ACCENTS.map(c => `<button class="swatch ${cfg.accent === c ? 'on' : ''}" style="background:${c}" data-act="set" data-k="accent" data-v="${c}"></button>`).join('')}</div>`),
     row(s('glass'), '', `<div class="sws">${GLASSES.map(([c, n]) => `<button class="swatch ${cfg.glass === c ? 'on' : ''}" title="${n}" style="background:${c}" data-act="set" data-k="glass" data-v="${c}"></button>`).join('')}</div>`),
     row(s('tint'), s('tintD'), range('tint', 0, 80, 2))) +
     `<h2>${s('position')}</h2>` + card(
-    row(s('position'), '', seg('position', [['left', s('pLeft')], ['center', s('pCenter')], ['right', s('pRight')]])),
-    row(s('monitor'), '', select('monitor', [['', s('mMain')], ...screens.filter(x => !x.primary).map(x => [x.id, x.name])])))],
+    row(s('position'), '', seg('position', [['left', s('pLeft')], ['center', s('pCenter')], ['right', s('pRight')], ['taskbar', s('pTaskbar')]])),
+    row(s('monitor'), '', select('monitor', [['', s('mMain')], ...screens.filter(x => !x.primary).map(x => [x.id, x.name])]))) +
+    `<h2 id="pack">${s('pharaohPack')}</h2>` + packCard()],
 
   ['about', 'ℹ️', () => head('Focus with a glance', s('aboutLead')) + card(
     row(s('version'), '', `<span class="pill">${esc(version || '—')}</span>`),
@@ -368,7 +461,7 @@ const SECTIONS = [
 
 /* ------------------------------------------------------------------ rendering */
 function renderAll() {
-  LANG = cfg.lang === 'ar' ? 'ar' : 'en';
+  LANG = ["ar", "zh"].includes(cfg.lang) ? cfg.lang : "en";
   document.documentElement.lang = LANG; document.documentElement.dir = isAr() ? 'rtl' : 'ltr';
   document.documentElement.style.setProperty('--acc', cfg.accent);
   document.title = s('general');
@@ -415,7 +508,10 @@ document.addEventListener('click', e => {
   const sg = e.target.closest('.seg button');
   if (sg) {
     const box = sg.parentElement, k = box.dataset.k;
-    setPath(cfg, k, conv(box, sg.dataset.v)); save();
+    if (sg.dataset.lock && !lic.pharaoh) { go('look'); setTimeout(() => $('#pack')?.scrollIntoView({ behavior: 'smooth' }), 50); return; }
+    setPath(cfg, k, conv(box, sg.dataset.v));
+    if (k.startsWith('calendar.') && sg.dataset.v === 'coptic') cfg.theme = 'pharaoh';   // the Coptic calendar comes with its Pharaonic look
+    save();
     if (k === 'lang') renderAll(); else renderSec();
     return;
   }
@@ -430,6 +526,7 @@ document.addEventListener('click', e => {
   }
   if (a === 'pick') post({ t: 'pick-sound' });
   if (a === 'open') post({ t: 'open', url: b.dataset.url });
+  if (a === 'buy') post({ t: 'buy' });
   if (a === 'test') testSound();
   if (a === 'test-stop') stopTest();
   if (a === 'fx-swap') { const x = cfg.fx.base; cfg.fx.base = cfg.fx.quote; cfg.fx.quote = x; save(); renderSec(); }

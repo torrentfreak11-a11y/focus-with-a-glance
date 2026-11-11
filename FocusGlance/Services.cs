@@ -84,6 +84,7 @@ public sealed class SettingsStore
     public string Monitor => Get("monitor", "");
     public string Position => Get("position", "center");
     public bool Pinned => Get("pinned", false);
+    public bool AutoHide => Get("autoHide", true);
 
     public List<string> IcalUrls
     {

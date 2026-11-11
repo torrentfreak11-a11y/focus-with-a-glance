@@ -35,6 +35,13 @@ static class Native
     [DllImport("kernel32.dll")] static extern uint GetCurrentThreadId();
 
     public static bool IsForeground(IntPtr h) => GetForegroundWindow() == h;
+    public static IntPtr Foreground() => GetForegroundWindow();
+
+    [StructLayout(LayoutKind.Sequential)] public struct RECT { public int Left, Top, Right, Bottom; }
+    [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr h, out RECT r);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetClassName(IntPtr h, System.Text.StringBuilder s, int max);
+    [DllImport("shell32.dll")] public static extern int SHQueryUserNotificationState(out int state);
+    public static uint WindowProcessId(IntPtr h) { GetWindowThreadProcessId(h, out uint pid); return pid; }
 
     /// <summary>SetForegroundWindow that also works when another app currently owns the foreground.</summary>
     public static void ForceForeground(IntPtr h)

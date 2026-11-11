@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.2.0
+
+- First run starts with a language choice: **English, العربية or 中文** (full Chinese translation)
+  - Arabic sets up prayer times, adhan and iqama alerts, Ramadan mode and the Hijri date automatically
+  - English asks for a second calendar (Hijri → then offers prayer times and Ramadan, or Chinese, or none)
+  - Chinese uses the Chinese lunar calendar first, with the Gregorian date beside it
+- Calendars: main + second calendar — Gregorian, Hijri, Chinese, and Coptic (Pharaonic pack)
+- Compact clock shows the weather beside the time, with animated sun, moon, clouds, rain, snow, fog, thunder and wind
+- Bluetooth: when headphones or other devices connect, the notch shows the name, battery and volume
+- Hides automatically during games, full-screen video and presentations
+- New position: **in the taskbar**, as a small pill; cards open upward from it
+- Pharaonic pack (Microsoft Store add-on): Coptic calendar, lapis-and-gold theme, hieroglyph details, your name in a cartouche
+- Reliability: recovers on its own if its web view crashes; unexpected errors are written to `crash.log`
+- Fixed: wind streaks overlapping the clock digits
+
 ## 2.1.1
 
 - Fixed: on first launch the welcome text appeared before the glass finished dropping in

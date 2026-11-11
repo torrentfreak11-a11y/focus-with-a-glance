@@ -35,9 +35,16 @@ arrows.
 | 📹 **Google Meet** | Countdown to your next meeting from any number of Google calendars (iCal links) |
 | 🎵 **Media** | Mini player for whatever is playing, with synced lyrics you can pin |
 | 🔊 **Volume** | A small overlay when you change the volume |
-| 🎨 **Look & position** | Accent and glass colors, tint, top left/center/right, any display |
+| 🎨 **Look & position** | Accent and glass colors, tint, top left/center/right, **or in the taskbar**, any display |
+| 🖱️ **Click-through** | It never blocks your work: clicks pass straight through everywhere except the glass itself |
+| ⛅ **Live weather** | Animated sun, moon, clouds, rain, snow, fog, thunder and wind right beside the clock |
+| 🎧 **Bluetooth** | Headphones and other devices show their name, battery and volume as they connect |
+| 🎮 **Stays out of the way** | Hides automatically during games, full-screen video and presentations |
+| 🗓️ **Calendars** | Gregorian, Hijri, Chinese lunar — and Coptic in the Pharaonic pack |
+| 𓋹 **Pharaonic pack** | Store add-on: Coptic calendar, lapis-and-gold glass, hieroglyphs and your name in a cartouche |
 
-The whole interface, settings included, is available in **English and Arabic**, with full right-to-left layout.
+The whole interface, settings included, is available in **English, Arabic and Chinese**, with full right-to-left layout
+for Arabic. The first run asks for your language and sets things up for it.
 
 ## Screenshots
 
@@ -47,6 +54,8 @@ The whole interface, settings included, is available in **English and Arabic**, 
 | ![Ramadan mode, Hijri date and countdowns](docs/screenshots/4-ramadan.jpg) | ![The cards in Arabic, right to left](docs/screenshots/5-arabic.jpg) |
 | ![Media player with synced lyrics](docs/screenshots/6-music.jpg) | ![Meeting countdown, focus timer, world clock, weather](docs/screenshots/7-workday.jpg) |
 | ![The compact clock, volume overlay and meeting pill](docs/screenshots/8-invisible.jpg) | ![One notch replaces eight apps](docs/screenshots/9-replaces.jpg) |
+| ![Click-through, animated weather and Bluetooth battery](docs/screenshots/11-smart.jpg) | ![English, Arabic and Chinese](docs/screenshots/12-languages.jpg) |
+| ![In the taskbar](docs/screenshots/13-taskbar.jpg) | ![The Pharaonic pack](docs/screenshots/10-pharaoh.jpg) |
 
 ## Install
 

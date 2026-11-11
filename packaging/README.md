@@ -42,6 +42,17 @@ build hides it automatically.
 6. Before each update, raise `<Version>` in `FocusGlance/FocusGlance.csproj`; the Store rejects a package
    whose version isn't higher.
 
+### The Pharaonic pack (paid add-on)
+
+1. In Partner Center open the app → **Add-ons → Create a new add-on → Durable**.
+2. **Product ID: `pharaoh`** (it must match `Licenses.PharaohToken` in `FocusGlance/Watchers.cs`).
+3. Pricing: **$0.99** (tier), all markets. Listing: name "Pharaonic pack", a short description and the
+   `promo/ads/10-pharaoh.png` image.
+4. Submit the add-on together with (or after) the app. Settings → Look & position then shows a **Get it · $0.99**
+   button; Windows shows the Store's own purchase dialog. The GitHub build only says the pack is in the Store version.
+5. Testing before release: Partner Center lets you mark test accounts; or run a **Debug** build with
+   `FOCUSGLANCE_PHARAOH=1` to preview the pack (release builds ignore that switch).
+
 ### What changes in the Store build
 
 - *Start with Windows* uses the package's startup task instead of the registry. Users can also turn it off in

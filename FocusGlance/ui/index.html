@@ -16,7 +16,7 @@ body{font-family:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;color:
   -webkit-user-select:none;user-select:none;cursor:default;font-size:11px;text-shadow:var(--shadow)}
 button{all:unset;cursor:pointer;display:inline-grid;place-items:center}
 svg{display:block}
-#stage{position:absolute;inset:0;transform-origin:var(--ox,50%) 0;transition:transform .38s var(--spring)}
+#stage{position:absolute;inset:0;transform-origin:var(--ox,50%) var(--oy,0);transition:transform .38s var(--spring)}
 #stage.zoom{transform:scale(1.24)}
 
 /* liquid layer: every shape here is merged by the goo filter */
@@ -162,6 +162,59 @@ svg{display:block}
 #pin:hover{background:rgba(255,255,255,.16);color:#fff}
 #pin.on{color:var(--acc2)}
 #lyrics.one #pin{top:50%;margin-top:-10px}
+
+/* full-screen apps and games: get out of the way */
+#stage{transition:transform .38s var(--spring),opacity .45s var(--ease)}
+#stage.fsHide{opacity:0;pointer-events:none}
+
+/* animated weather glyph beside the compact clock */
+.wxg{width:20px;height:20px;overflow:visible;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.45))}
+.wxg .rays{transform-origin:10px 10px;animation:spin 16s linear infinite}
+.wxg .drift{animation:drift 3.6s ease-in-out infinite alternate}
+.wxg .drop{animation:drop 1.05s linear infinite}
+.wxg .flake{animation:flake 2.6s linear infinite}
+.wxg .bolt{animation:bolt 2.8s infinite}
+.wxg .fogl{animation:fogl 3s ease-in-out infinite alternate}
+.wxg .star{animation:tw 2.4s ease-in-out infinite}
+.wxg .gust{stroke-dasharray:9 14;animation:gust 1.6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes drift{from{transform:translateX(-.8px)}to{transform:translateX(1.2px)}}
+@keyframes drop{0%{transform:translateY(-1px);opacity:0}20%{opacity:1}100%{transform:translateY(6px);opacity:0}}
+@keyframes flake{0%{transform:translate(0,-1px);opacity:0}25%{opacity:1}100%{transform:translate(1px,6px);opacity:0}}
+@keyframes bolt{0%,62%,72%,100%{opacity:0}64%,70%{opacity:1}}
+@keyframes fogl{from{transform:translateX(-1.5px)}to{transform:translateX(1.5px)}}
+@keyframes tw{0%,100%{opacity:.25}50%{opacity:1}}
+@keyframes gust{to{stroke-dashoffset:-23}}
+
+/* bluetooth device overlay */
+.bt .lbl{max-width:118px}
+.bat{display:inline-block;width:22px;height:10px;border-radius:3px;box-shadow:inset 0 0 0 1.3px rgba(255,255,255,.75);position:relative;padding:2px;box-sizing:border-box}
+.bat::after{content:"";position:absolute;right:-3px;top:3px;width:2px;height:4px;border-radius:0 1px 1px 0;background:rgba(255,255,255,.75)}
+.bat i{display:block;height:100%;border-radius:1px;background:#7ef0a0}
+.bat.low i{background:#ff8a7a}
+.btv{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--fg2)}
+.btv svg{width:12px;height:12px}
+
+/* onboarding choices */
+.choices{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.choice{font-size:12px;font-weight:700;padding:5px 11px;border-radius:9px;background:rgba(255,255,255,.12);box-shadow:inset 0 0 0 1px rgba(255,255,255,.24)}
+.choice:hover{background:color-mix(in srgb,var(--acc) 35%,transparent)}
+.choice.pri{background:color-mix(in srgb,var(--acc) 35%,transparent)}
+.choice.lock{opacity:.55}
+
+/* ---------------- Pharaonic pack ---------------- */
+.cart{display:inline-flex;align-items:center;gap:1px;padding:1px 9px 1px 7px;border-radius:999px;font-family:"Segoe UI Historic",sans-serif;
+  font-size:14px;line-height:1.2;color:var(--acc);box-shadow:inset 0 0 0 1.4px var(--acc);position:relative;text-shadow:none}
+.cart::after{content:"";position:absolute;right:-4px;top:2px;bottom:2px;width:2px;border-radius:1px;background:var(--acc)}
+.gl{font-family:"Segoe UI Historic",sans-serif;font-size:16px;line-height:0;vertical-align:-2px;color:var(--acc);text-shadow:none;margin-inline-end:4px;letter-spacing:0}
+[data-theme=pharaoh]{--acc:#e8c46a;--acc2:#f3d98c}
+[data-theme=pharaoh] #sheen{background:
+   radial-gradient(120% 70% at 20% -10%,rgba(255,231,170,.22),rgba(255,255,255,0) 55%),
+   linear-gradient(180deg,rgba(255,215,130,.10),rgba(255,255,255,0) 45%,rgba(255,255,255,0) 70%,rgba(232,196,106,.10));
+   box-shadow:inset 0 -1px 0 rgba(232,196,106,.45),inset 0 0 0 1px rgba(232,196,106,.18),inset 0 0 18px rgba(232,196,106,.10)}
+[data-theme=pharaoh] .bignum>span,[data-theme=pharaoh] .digits{background:linear-gradient(180deg,#fffaf0 5%,#f7e2a2 55%,#e2b85c 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:none;filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
+[data-theme=pharaoh] .ttl{color:color-mix(in srgb,var(--acc) 75%,#fff)}
 </style>
 </head>
 <body>
@@ -171,7 +224,7 @@ svg{display:block}
     <feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -10" result="g"/>
     <feMorphology in="g" operator="erode" radius="1.2" result="er"/>
     <feComposite in="g" in2="er" operator="out" result="ring"/>
-    <feFlood flood-color="#ffffff" flood-opacity=".55"/>
+    <feFlood id="rimC" flood-color="#ffffff" flood-opacity=".55"/>
     <feComposite in2="ring" operator="in" result="rim"/>
     <feGaussianBlur in="g" stdDeviation="5" result="sb"/>
     <feOffset in="sb" dy="3" result="so"/>
@@ -244,7 +297,17 @@ const S = {
   fxAmt: 100, fxRev: false, nameDraft: '',
   iqama: null, fired: new Set(),
   compactW: 150,
+  onbStep: 'lang', fs: false, bt: null, lic: { pharaoh: false, store: false },
 };
+const pharaoh = () => cfg.theme === 'pharaoh' && S.lic.pharaoh;
+const calOk = c => !CAL_LOCKED.includes(c) || S.lic.pharaoh;
+// the calendar shown on the calendar card: the chosen second calendar, else whichever complements the main one
+const altCal = () => {
+  const { primary, extra } = cfg.calendar;
+  if (extra !== 'none' && extra !== primary && calOk(extra)) return extra;
+  return primary !== 'gregory' ? 'gregory' : 'islamic';
+};
+const CAL_ICON = { islamic: '🌙', chinese: '🏮', gregory: '📅', coptic: '☥' };
 const CH = 34, HH = 40, FULL = { w: 192, h: 96, top: 16 }, ONB = { w: 244, h: 92, top: 12 };
 
 /* ------------------------------------------------------------------ host bridge */
@@ -267,16 +330,27 @@ if (host) host.addEventListener('message', e => {
     case 'media': onMedia(m); break;
     case 'meet': S.meet = m; render(); break;
     case 'settings': onSettings(m.data || {}); break;
+    case 'fs': S.fs = !!m.v; $('#stage').classList.toggle('fsHide', S.fs); break;
+    case 'place': S.tb = m.tb || 48; if (m.restarted) S.restarted = true; layout(); break;
+    case 'bt': onBluetooth(m); break;
+    case 'lic': S.lic = { pharaoh: !!m.pharaoh, store: !!m.store }; applyLook(); render(true); break;
   }
 });
 
 function applyLook() {
-  LANG = cfg.lang === 'ar' ? 'ar' : 'en';
+  LANG = ['ar', 'zh'].includes(cfg.lang) ? cfg.lang : 'en';
   document.documentElement.lang = LANG;
-  document.getElementById('tintA').setAttribute('slope', String(Math.max(0, cfg.tint) / 100));
-  const r = document.documentElement.style;
-  r.setProperty('--acc', cfg.accent); r.setProperty('--glass', cfg.glass);
+  // in the taskbar the glass sits over taskbar buttons, so it needs to be nearly solid to stay readable
+  document.getElementById('tintA').setAttribute('slope', String(Math.max(0, TB() ? Math.max(cfg.tint, 88) : cfg.tint) / 100));
+  const ph = pharaoh(), r = document.documentElement.style;
+  document.documentElement.dataset.theme = ph ? 'pharaoh' : 'glass';
+  // the Pharaonic pack paints the glass in lapis lazuli with a gold rim
+  r.setProperty('--acc', ph ? '#e8c46a' : cfg.accent); r.setProperty('--glass', ph ? '#0a1a4a' : cfg.glass);
+  const rim = document.getElementById('rimC');
+  rim.setAttribute('flood-color', ph ? '#e8c46a' : '#ffffff'); rim.setAttribute('flood-opacity', ph ? '.85' : '.55');
 }
+// decorative hieroglyph before a card title (Pharaonic pack only)
+const gl = g => pharaoh() && cfg.glyphs ? `<span class="gl">${g}</span>` : '';
 function onSettings(data) {
   const prev = cfg;
   cfg = merge(DEFAULTS, data);
@@ -293,8 +367,18 @@ function onSettings(data) {
 
 /* ------------------------------------------------------------------ geometry */
 const W = () => innerWidth;
-const CX = () => cfg.position === 'left' ? 132 : cfg.position === 'right' ? innerWidth - 132 : innerWidth / 2;
+// Taskbar mode: the window sits on the bottom-left of the screen; the pill lives inside the taskbar
+// and the cards rise above it instead of dropping from the top edge.
+const TB = () => cfg.position === 'taskbar';
+const CX = () => cfg.position === 'left' ? 132 : cfg.position === 'right' ? innerWidth - 132 : TB() ? 46 + FULL.w / 2 : innerWidth / 2;
 function visRect() {
+  if (TB()) {
+    const H = innerHeight, tb = S.tb || 48;
+    if (S.mode === 'full') return { x: 46, y: H - tb - 10 - FULL.h, w: FULL.w, h: FULL.h, r: 22 };
+    if (S.mode === 'onboard') return { x: 8, y: H - tb - 10 - ONB.h, w: ONB.w, h: ONB.h, r: 24 };
+    const h = Math.min(S.mode === 'hello' ? HH : CH, tb - 8), w = S.compactW;
+    return { x: 8, y: H - tb / 2 - h / 2, w, h, r: h / 2 };
+  }
   if (S.mode === 'full') return { x: CX() - FULL.w / 2, y: FULL.top, w: FULL.w, h: FULL.h, r: 22 };
   if (S.mode === 'onboard') return { x: CX() - ONB.w / 2, y: ONB.top, w: ONB.w, h: ONB.h, r: 24 };
   const h = S.mode === 'hello' ? HH : CH, w = S.compactW;
@@ -315,13 +399,15 @@ function lyricsVisible() {
 }
 
 function layout() {
-  const R = visRect(), compact = S.mode !== 'full' && S.mode !== 'onboard';
+  const R = visRect(), compact = S.mode !== 'full' && S.mode !== 'onboard', tb = TB();
   const M = $('#main'), bar = $('#bar');
-  $('#stage').style.setProperty('--ox', CX() + 'px');
-  if (!animating) css(M, R, compact ? 22 : 0);
-  // a bezel lip glued to the top edge: the goo turns it into a notch with concave corners
+  const st = $('#stage').style;
+  st.setProperty('--ox', (tb ? R.x + R.w / 2 : CX()) + 'px'); st.setProperty('--oy', tb ? (R.y + R.h) + 'px' : '0px');
+  if (!animating) css(M, R, compact && !tb ? 22 : 0);
+  // a bezel lip glued to the top edge: the goo turns it into a notch with concave corners (none in the taskbar)
   const bw = compact ? R.w + 16 : 46;
-  css(bar, { x: CX() - bw / 2, y: -12, w: bw, h: 14, r: 0 });
+  if (tb) css(bar, { x: R.x + R.w / 2, y: innerHeight + 20, w: 0, h: 0, r: 0 });
+  else css(bar, { x: CX() - bw / 2, y: -12, w: bw, h: 14, r: 0 });
   css($('#sheen'), R); css($('#content'), R);
   $('#sheen').classList.toggle('glow', !!S.alert);
   const hd = $('#handle');
@@ -335,21 +421,26 @@ function layout() {
   // lyrics drip
   const ly = $('#lyrics'), lyb = $('#lyb'), vis = lyricsVisible();
   let LR;
-  if (S.mode === 'full') LR = { x: CX() - 125, y: R.y + R.h + 12, w: 250, h: 62, r: 18 };
+  if (tb) {   // in the taskbar the lyrics float above the pill / card
+    if (S.mode === 'full') LR = { x: R.x + R.w / 2 - 125, y: R.y - 12 - 62, w: 250, h: 62, r: 18 };
+    else { const lw = Math.max(R.w, 210); LR = { x: R.x, y: R.y - 9 - 24, w: lw, h: 24, r: 12 }; }
+  }
+  else if (S.mode === 'full') LR = { x: CX() - 125, y: R.y + R.h + 12, w: 250, h: 62, r: 18 };
   else LR = { x: CX() - Math.max(R.w, 210) / 2, y: R.y + R.h + 9, w: Math.max(R.w, 210), h: 24, r: 12 };
   ly.classList.toggle('one', S.mode !== 'full');
   ly.classList.toggle('hidden', !vis);
   css(ly, LR);
   if (vis) { css(lyb, LR); lyb.style.opacity = 1; }
-  else { css(lyb, { x: CX() - 15, y: R.y + R.h - 26, w: 30, h: 24, r: 12 }); lyb.style.opacity = 0; }
+  else { css(lyb, { x: R.x + R.w / 2 - 15, y: tb ? R.y + 2 : R.y + R.h - 26, w: 30, h: 24, r: 12 }); lyb.style.opacity = 0; }
 }
 
 /* ------------------------------------------------------------------ content */
 let curLayer = null, curKey = '';
 function view() {
-  if (S.mode === 'onboard') return { key: 'onboard:' + LANG, full: true, html: onboardHTML() };
+  if (S.mode === 'onboard') return { key: 'onboard:' + LANG + ':' + S.onbStep, full: true, html: onboardHTML() };
   if (S.mode === 'hello') return { key: 'hello', full: false, html: helloHTML() };
   if (S.mode === 'compact' && S.overlay === 'volume') return { key: 'vol', full: false, ltr: true, html: volHTML() };
+  if (S.mode === 'compact' && S.overlay === 'bt' && S.bt) return { key: 'bt:' + S.bt.id + S.bt.on, full: false, html: btHTML() };
   if (S.mode === 'compact' && S.alert) return { key: 'alert:' + S.alert.id, full: false, html: alertHTML() };
   const full = S.mode === 'full';
   const fn = (full ? FULLV : COMPV)[S.card] || COMPV.clock;
@@ -640,15 +731,74 @@ function renderLyrics() {
 
 /* ------------------------------------------------------------------ views */
 function onboardHTML() {
-  return `<div class="full onb"><div class="ttl" style="padding-inline-end:70px">${esc(t('welcome'))}</div>` +
-    `<div class="hl" style="margin-top:6px">${t('askName')}</div>` +
+  const head = `<div class="full onb"><div class="ttl">${esc(t('welcome'))}</div>`;
+  if (S.onbStep === 'lang')    // every language name is written in its own script
+    return `<div class="full onb"><div class="ttl">Welcome · أهلاً · 欢迎</div><div class="hl" style="margin-top:5px">${t('chooseLang')}</div>` +
+      `<div class="choices">${LANGS.map(([k, n]) => `<button class="choice" data-hit data-act="onb-pick-lang" data-v="${k}">${n}</button>`).join('')}</div></div>`;
+  if (S.onbStep === 'cal')
+    return head + `<div class="hl" style="margin-top:5px">${t('addCal')}</div><div class="choices">` +
+      ['islamic', 'chinese'].map(c => `<button class="choice" data-hit data-act="onb-cal" data-v="${c}">${t('cal' + c)}</button>`).join('') +
+      (S.lic.pharaoh ? `<button class="choice" data-hit data-act="onb-cal" data-v="coptic">${t('calcoptic')}</button>` : '') +
+      `<button class="choice" data-hit data-act="onb-cal" data-v="none">${t('calNone')}</button></div></div>`;
+  if (S.onbStep === 'prayer')
+    return head + `<div class="hl" style="margin-top:4px;font-size:13px;white-space:normal;line-height:1.15">${t('showPrayer')}</div><div class="choices" style="margin-top:6px">` +
+      `<button class="choice pri" data-hit data-act="onb-prayer" data-v="1">🕌 ${t('yes')}</button><button class="choice" data-hit data-act="onb-prayer" data-v="0">${t('no')}</button></div></div>`;
+  return head + `<div class="hl" style="margin-top:6px">${t('askName')}</div>` +
     `<div class="calc" style="margin-top:8px"><input id="nameIn" class="kin" data-hit maxlength="24" placeholder="${t('namePh')}" value="${esc(S.nameDraft)}">` +
-    `<button class="sw go" data-hit data-act="onb-go">${t('go')}</button></div>` +
-    `<button class="lng" data-hit data-act="onb-lang">${isAr() ? 'English' : 'العربية'}</button></div>`;
+    `<button class="sw go" data-hit data-act="onb-go">${t('go')}</button></div></div>`;
 }
 function helloHTML() {
-  return `<div class="row"><span class="hello">${t('hello')} <b>${esc(cfg.name)}</b></span>` +
+  const name = pharaoh() && cfg.glyphs && toGlyphs(cfg.name)
+    ? `<b>${esc(cfg.name)}</b> <span class="cart" title="${esc(cfg.name)}">${toGlyphs(cfg.name)}</span>` : `<b>${esc(cfg.name)}</b>`;
+  return `<div class="row"><span class="hello">${t('hello')} ${name}</span>` +
          `<button class="wave" data-hit data-act="wave" title="${t('waveBack')}">👋</button></div>`;
+}
+// The first-run answers decide which cards and calendars a new user starts with.
+function onboardPreset(lang, extra, prayer) {
+  const c = cfg, on = !!prayer;
+  c.lang = lang;
+  c.calendar = { primary: lang === 'zh' ? 'chinese' : 'gregory', extra: lang === 'zh' ? 'gregory' : extra };
+  c.cards.hijri = c.calendar.extra !== 'none' && lang !== 'zh';
+  c.cards.prayer = on; c.adhan.enabled = on; c.ramadan = on ? 'auto' : 'off';
+  c.islamicEvents = extra === 'islamic';
+  c.fx = { base: 'USD', quote: lang === 'ar' ? 'SAR' : lang === 'zh' ? 'CNY' : 'EUR' };
+  if (extra === 'coptic' && S.lic.pharaoh) c.theme = 'pharaoh';
+}
+function finishOnboarding() {
+  const c = cfg;
+  post({ t: 'patch', patch: { name: c.name, lang: c.lang, calendar: c.calendar, cards: c.cards, adhan: c.adhan, ramadan: c.ramadan, islamicEvents: c.islamicEvents, fx: c.fx, theme: c.theme } });
+  S.fx = null; loadFx(); applyLook();
+  S.mode = 'hello'; render(true);
+}
+const BT_ICON = { headphones: '🎧', speaker: '🔊', mouse: '🖱️', keyboard: '⌨️', gamepad: '🎮', watch: '⌚', phone: '📱', computer: '💻' };
+const BT_SVG = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#9fd0ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l10 10-5 4V3l5 4L7 17"/></svg>';
+function btKind(b) {
+  if (b.kind && b.kind !== 'other') return b.kind;
+  const n = (b.name || '').toLowerCase();   // names are often more telling than device classes
+  if (/airpods|buds|headphone|headset|earbud|wh-|wf-|q\d+|soundcore|beats|jabra/.test(n)) return 'headphones';
+  if (/speaker|soundlink|jbl|boom|flip|charge/.test(n)) return 'speaker';
+  if (/mouse|mx master|trackpad/.test(n)) return 'mouse';
+  if (/keyboard|keys/.test(n)) return 'keyboard';
+  if (/controller|gamepad|xbox|dualsense|dualshock/.test(n)) return 'gamepad';
+  if (/watch|band/.test(n)) return 'watch';
+  return 'other';
+}
+function btHTML() {
+  const b = S.bt, k = btKind(b), icon = BT_ICON[k] ? `<span class="ic">${BT_ICON[k]}</span>` : BT_SVG;
+  if (!b.on) return `<div class="row bt">${icon}<span class="lbl trunc">${esc(b.name || '')}</span><span class="lbl" style="color:var(--fg3)">${t('btOff')}</span></div>`;
+  const bat = b.battery != null ? `<span class="bat ${b.battery <= 20 ? 'low' : ''}" title="${t('battery')}"><i style="width:${b.battery}%"></i></span><span class="digits sm">${b.battery}%</span>` : '';
+  const audio = (k === 'headphones' || k === 'speaker') && S.vol ? `<span class="btv">${S.vol.muted || !S.vol.v ? IC.mute : IC.spk}${S.vol.muted ? '—' : S.vol.v}</span>` : '';
+  return `<div class="row bt">${icon}<span class="lbl trunc" style="color:#fff">${esc(b.name || t('btOn'))}</span>${bat}${audio}</div>`;
+}
+function onBluetooth(m) {
+  if (!cfg.btOverlay) return;
+  if (m.update && (!S.bt || S.bt.id !== m.id)) return;
+  S.bt = { ...(S.bt && S.bt.id === m.id ? S.bt : {}), ...m };
+  if (S.mode === 'hello' || S.mode === 'boot' || S.mode === 'onboard' || S.alert) return;
+  if (S.mode === 'full' && !S.inputFocus) S.mode = 'compact';
+  S.overlay = 'bt'; S.overlayUntil = Date.now() + (m.on ? 5000 : 2500);
+  render(!m.update);
+  if (m.on && !m.update) liquidPulse(true);
 }
 function volHTML() {
   const v = S.vol || { v: 0, muted: false };
@@ -673,9 +823,29 @@ function prayerCompact() {
   return `<div class="row"><span class="ic">🕌</span><span class="lbl">${t(n.name)}</span><span class="digits sm">${fmt(n.at, false, true)}</span></div>`;
 }
 
+// Small animated weather picture: sun, moon, clouds, rain, snow, fog, thunder, and wind streaks on windy days.
+function wxGlyph(w) {
+  if (!w) return '';
+  const c = +w.c.weather_code, day = !!w.c.is_day, windy = (+w.c.wind_speed_10m || 0) >= 28;
+  const sun = (x = 10, y = 10, r = 4.2) => `<g class="rays" style="transform-origin:${x}px ${y}px">${[0, 45, 90, 135, 180, 225, 270, 315].map(a => `<line x1="${x}" y1="${y - r - 2}" x2="${x}" y2="${y - r - 3.8}" stroke="#ffd25a" stroke-width="1.5" stroke-linecap="round" transform="rotate(${a} ${x} ${y})"/>`).join('')}</g><circle cx="${x}" cy="${y}" r="${r}" fill="#ffd25a"/>`;
+  const moon = (x = 10, y = 10) => `<path d="M${x + 2.5} ${y - 6}a6 6 0 1 0 4.2 9.6 5 5 0 0 1-4.2-9.6z" fill="#eef2ff"/><circle class="star" cx="${x - 5}" cy="${y - 5}" r=".9" fill="#fff"/><circle class="star" cx="${x + 6}" cy="${y + 4}" r=".7" fill="#fff" style="animation-delay:1.1s"/>`;
+  const cloud = (dy = 0, fill = '#e3ebf7') => `<path class="drift" d="M5.5 ${15 + dy}h9.2a3.6 3.6 0 0 0 .5-7.15 5.1 5.1 0 0 0-9.9 1.25A3 3 0 0 0 5.5 ${15 + dy}z" fill="${fill}"/>`;
+  const drops = (cls, ch) => [0, 1, 2].map(i => `<g class="${cls}" style="animation-delay:${i * (cls === 'drop' ? .33 : .8)}s">${ch(6.5 + i * 3.6, 15.5)}</g>`).join('');
+  let g;
+  if (c === 0) g = day ? sun() : moon();
+  else if (c <= 2) g = (day ? sun(7, 7, 3.2) : moon(7, 8)) + cloud(2);
+  else if (c === 3) g = cloud(-1, '#cfd8e6');
+  else if (c <= 48) g = cloud(-3, '#cfd8e6') + [0, 1].map(i => `<line class="fogl" x1="4" y1="${15 + i * 3}" x2="16" y2="${15 + i * 3}" stroke="#dfe6f2" stroke-width="1.4" stroke-linecap="round" style="animation-delay:${i * .7}s"/>`).join('');
+  else if ((c <= 67) || (c >= 80 && c <= 82)) g = cloud(-3) + drops('drop', (x, y) => `<line x1="${x}" y1="${y}" x2="${x - .7}" y2="${y + 2.4}" stroke="#7cc7ff" stroke-width="1.4" stroke-linecap="round"/>`);
+  else if (c <= 86) g = cloud(-3) + drops('flake', (x, y) => `<circle cx="${x}" cy="${y + 1}" r="1.1" fill="#fff"/>`);
+  else g = cloud(-3, '#c3cbe0') + `<path class="bolt" d="M10.5 12.5l-2.3 4h2.2l-1.4 3.6 4-5h-2.3l1.5-2.6z" fill="#ffd25a"/>`;
+  const gust = windy ? `<path class="gust" d="M-3 8h7a2 2 0 1 0-2-2M-4 13h9a2 2 0 1 1-2 2" fill="none" stroke="#e9f1ff" stroke-width="1.2" stroke-linecap="round"/>` : '';
+  return `<svg class="wxg" viewBox="0 0 20 20"${windy ? ' style="margin-inline-start:5px"' : ''}>${gust}${g}</svg>`;
+}
+
 const COMPV = {
-  clock: () => `<div class="row"><span class="digits">${fmt(new Date(), cfg.showSeconds)}</span></div>`,
-  hijri: () => `<div class="row"><span class="ic">🌙</span><span class="lbl" style="color:#fff">${esc(hijriText(new Date(), cfg.hijri, 'short'))}</span></div>`,
+  clock: () => `<div class="row">${pharaoh() && cfg.glyphs ? '<span class="gl" style="font-size:15px">𓇳</span>' : ''}<span class="digits">${fmt(new Date(), cfg.showSeconds)}</span>${cfg.compactWeather && cfg.cards.weather ? wxGlyph(S.weather) : ''}</div>`,
+  hijri: () => `<div class="row"><span class="ic">${CAL_ICON[altCal()]}</span><span class="lbl" style="color:#fff">${esc(calText(new Date(), altCal(), cfg, 'short'))}</span></div>`,
   prayer: prayerCompact,
   ramadan: () => {
     const r = ramadanInfo(); if (!r) return COMPV.clock();
@@ -718,17 +888,20 @@ const FULLV = {
   clock: () => {
     const d = new Date(), h = d.getHours();
     const date = d.toLocaleDateString(gregLocale(), { weekday: 'long', day: 'numeric', month: 'long' });
-    return `<div class="full"><div class="ttl">${esc(S.loc?.city || t('localTime'))}</div>` +
+    const prim = calOk(cfg.calendar.primary) ? cfg.calendar.primary : 'gregory', ex = cfg.calendar.extra;
+    const line1 = prim === 'gregory' ? date : calText(d, prim, cfg, 'weekday');
+    const line2 = ex !== 'none' && ex !== prim && calOk(ex) ? calText(d, ex, cfg) : (prim !== 'gregory' ? date : '');
+    return `<div class="full"><div class="ttl">${gl('𓇳')}${esc(S.loc?.city || t('localTime'))}</div>` +
       `<div class="bignum"><span style="direction:ltr;unicode-bidi:isolate">${fmt(d, false)}<small>${cfg.showSeconds ? ':' + pad(d.getSeconds()) : ''}</small></span>${cfg.use24h ? '' : `<small>${h >= 12 ? t('pm') : t('am')}</small>`}</div>` +
-      `<div class="sub">${date}</div><div class="sub">${esc(hijriText(d, cfg.hijri))}</div>` + gearBtn() + `</div>`;
+      `<div class="sub">${esc(line1)}</div>${line2 ? `<div class="sub">${esc(line2)}</div>` : ''}` + gearBtn() + `</div>`;
   },
   hijri: () => {
-    const d = new Date(), occ = cfg.islamicEvents ? null : null;
-    const nextOcc = islamicOccasions(cfg.hijri).find(o => o.at >= sod(d));
-    return `<div class="full"><div class="ttl">${t('hijri')}</div>` +
-      `<div class="hl" style="font-size:19px;margin-top:2px">${esc(hijriText(d, cfg.hijri, 'short'))}</div>` +
-      `<div class="sub">${esc(hijriText(d, cfg.hijri, 'weekday'))}</div>` +
-      `<div class="sub">${d.toLocaleDateString(gregLocale(), { day: 'numeric', month: 'long', year: 'numeric' })}</div>` +
+    const d = new Date(), cal = altCal();
+    const nextOcc = cal === 'islamic' && cfg.islamicEvents ? islamicOccasions(cfg.hijri).find(o => o.at >= sod(d)) : null;
+    return `<div class="full"><div class="ttl">${gl(cal === 'coptic' ? '𓋹' : '𓇹')}${t('calTitle_' + cal)}</div>` +
+      `<div class="hl" style="font-size:19px;margin-top:2px">${esc(calText(d, cal, cfg, 'short'))}</div>` +
+      `<div class="sub">${esc(calText(d, cal, cfg, 'weekday'))}</div>` +
+      `<div class="sub">${esc(cal === 'gregory' ? calText(d, 'islamic', cfg) : d.toLocaleDateString(gregLocale(), { day: 'numeric', month: 'long', year: 'numeric' }))}</div>` +
       (nextOcc ? `<div class="sub" style="color:var(--acc)">${nextOcc.emoji} ${t(nextOcc.k)} · ${evWhen({ ...nextOcc }, false)}</div>` : '') +
       gearBtn('hijri') + `</div>`;
   },
@@ -949,13 +1122,14 @@ function raiseAlert(a) {
   liquidPulse();
 }
 function dismissAlert() { stopSound(); S.alert = null; render(true); }
-async function liquidPulse() {
+async function liquidPulse(once) {
   if (animating) return;
   await new Promise(r => setTimeout(r, 350));
   const R = visRect(), cx = R.x + R.w / 2, B = $('#bB');
   B.style.display = 'block';
-  for (let i = 0; i < 2 && S.alert; i++) {
-    await B.animate([kf(circ(cx, R.y + R.h - 13, 20)), kf(circ(cx, R.y + R.h + 16, 17)), kf(circ(cx, R.y + R.h - 13, 20))],
+  for (let i = 0; i < (once ? 1 : 2) && (once || S.alert); i++) {
+    const a = TB() ? [circ(cx, R.y + 13, 20), circ(cx, R.y - 16, 17)] : [circ(cx, R.y + R.h - 13, 20), circ(cx, R.y + R.h + 16, 17)];
+    await B.animate([kf(a[0]), kf(a[1]), kf(a[0])],
       { duration: 760, easing: 'cubic-bezier(.45,0,.35,1.3)' }).finished;
   }
   if (!animating) B.style.display = 'none';
@@ -1006,16 +1180,32 @@ function act(a, el) {
       const inp = $('#nameIn'), name = (inp ? inp.value : S.nameDraft).trim();
       if (!name) { inp && inp.classList.remove('shake'); void (inp && inp.offsetWidth); inp && inp.classList.add('shake'); inp && inp.focus(); break; }
       cfg.name = name;
-      post({ t: 'patch', patch: { name, lang: cfg.lang } });
       if (document.activeElement) document.activeElement.blur();
       wantFocus(false);
-      S.mode = 'hello'; render(true);
+      // Arabic starts with prayer times, adhan, iqama, Ramadan mode and the Hijri date;
+      // Chinese with the Chinese calendar first and the Gregorian date beside it;
+      // English asks which second calendar to add.
+      if (cfg.lang === 'en') { S.onbStep = 'cal'; render(true); break; }
+      onboardPreset(cfg.lang, 'islamic', cfg.lang === 'ar');
+      finishOnboarding();
       break;
     }
-    case 'onb-lang': {
-      const inp = $('#nameIn'); if (inp) S.nameDraft = inp.value;
-      cfg.lang = isAr() ? 'en' : 'ar'; applyLook(); render(true);
-      setTimeout(focusName, 60);
+    case 'onb-pick-lang': {
+      cfg.lang = el.dataset.v; applyLook();
+      S.onbStep = 'name'; render(true);
+      setTimeout(focusName, 120);
+      break;
+    }
+    case 'onb-cal': {
+      const c = el.dataset.v;
+      if (c === 'islamic') { S.onbStep = 'prayer'; render(true); break; }
+      onboardPreset('en', c, false);
+      finishOnboarding();
+      break;
+    }
+    case 'onb-prayer': {
+      onboardPreset('en', 'islamic', el.dataset.v === '1');
+      finishOnboarding();
       break;
     }
     case 'toggle': S.mode === 'full' ? collapse() : enterFull(); break;
@@ -1095,6 +1285,18 @@ async function dropIn(target) {
   measure();
   const R = visRect(), cx = CX();
   const M = $('#main'), B = $('#bB'), bar = $('#bar');
+  if (TB()) {   // taskbar: a bead of glass rises from the bottom edge and stretches into the pill
+    M.style.transition = 'none'; css(M, circ(R.x + R.w / 2, innerHeight + 16, 22)); void M.offsetWidth; M.style.transition = '';
+    $('#sheen').classList.add('off');
+    await new Promise(r => setTimeout(r, 60));
+    css(M, R, 0);
+    await new Promise(r => setTimeout(r, 620));
+    $('#sheen').classList.remove('off');
+    curLayer.style.transition = 'opacity .4s'; curLayer.style.opacity = '1';
+    animating = false; layout();
+    if (target === 'onboard') setTimeout(focusName, 300);
+    return;
+  }
   M.style.transition = 'none'; css(M, { x: cx - 12, y: -30, w: 24, h: 24, r: 12 }); void M.offsetWidth; M.style.transition = '';
   $('#sheen').classList.add('off');
   bar.style.transition = 'none'; css(bar, { x: cx, y: -12, w: 0, h: 16, r: 0 }); void bar.offsetWidth; bar.style.transition = '';
@@ -1118,7 +1320,8 @@ async function start() {
   if (w) S.weather = w;
   if (f && f.base === cfg.fx.base && f.quote === cfg.fx.quote) S.fx = f;
   if (F.day !== new Date().toDateString()) { F.day = new Date().toDateString(); F.done = 0; fSave(); }
-  dropIn(cfg.name ? 'hello' : 'onboard');
+  // after a self-restart (the browser engine died) come back quietly, without the greeting
+  dropIn(!cfg.name ? 'onboard' : S.restarted ? 'compact' : 'hello');
   S.loc = await resolveLoc();
   const c = lsGet('prayer');
   if (c && c.key === prayerKey(dayStr(new Date()))) S.prayer = c;

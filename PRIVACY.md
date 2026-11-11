@@ -33,6 +33,17 @@ To show the mini player and volume overlay, the app reads the current media titl
 system volume level, from Windows. This information is only shown on screen and, for lyrics, sent to lrclib.net
 as described above.
 
+## Bluetooth
+
+When a Bluetooth device connects, the app reads its name, type and battery level from Windows to show them on
+screen for a few seconds. This stays on your PC and is never sent anywhere. You can turn it off in
+Settings → General → Bluetooth devices.
+
+## Purchases (Microsoft Store version)
+
+The optional Pharaonic pack is sold through the Microsoft Store. Microsoft handles the payment; the app only asks
+Windows whether the add-on is owned. The developer receives no payment details.
+
 ## Children
 
 The app does not knowingly collect any information from anyone, including children.

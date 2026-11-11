@@ -10,11 +10,24 @@ namespace FocusGlance;
 
 static class Program
 {
+    /// <summary>Started by the app itself after its browser engine died: skip the greeting.</summary>
+    public static bool Restarted { get; private set; }
+
     [STAThread]
-    static void Main()
+    static void Main(string[] args)
     {
-        using var mutex = new Mutex(true, "FocusWithAGlance.SingleInstance.v2", out bool created);
-        if (!created) return;
+        using var mutex = new Mutex(false, "FocusWithAGlance.SingleInstance.v2");
+        bool owned;
+        // after a self-restart, give the previous copy a moment to exit
+        try { owned = mutex.WaitOne(args.Contains("--restart") ? 15000 : 0); }
+        catch (AbandonedMutexException) { owned = true; }
+        if (!owned) return;
+        Restarted = args.Contains("--restart");
+        // never vanish silently: log anything unexpected and keep running when it is safe to
+        Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+        Application.ThreadException += (_, e) => GlanceForm.Crash("ui", e.Exception);
+        AppDomain.CurrentDomain.UnhandledException += (_, e) => GlanceForm.Crash("fatal", e.ExceptionObject as Exception);
+        TaskScheduler.UnobservedTaskException += (_, e) => { GlanceForm.Crash("task", e.Exception); e.SetObserved(); };
         Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
@@ -112,6 +125,10 @@ sealed class GlanceForm : Form
     MediaService? media;
     CalendarService? calendar;
     SettingsWindow? settingsWindow;
+    FullscreenWatcher? fullscreen;
+    BluetoothWatcher? bluetooth;
+    public bool Pharaoh { get; private set; }
+    bool hiddenForFullscreen;
 
     bool ready, clickThrough = true, cursorInside, focusable;
     int lastCx = int.MinValue, lastCy, lastVol = -1, ticks;
@@ -178,14 +195,26 @@ sealed class GlanceForm : Form
         scale = DeviceDpi / 96f * Zoom;
         int w = (int)Math.Round(LogicalW * scale), h = (int)Math.Round(LogicalH * scale);
         var b = screen.Bounds;
-        int x = Store.Position switch
+        if (Store.Position == "taskbar")
         {
-            "left" => b.Left,
-            "right" => b.Right - w,
-            _ => b.Left + (b.Width - w) / 2,
-        };
-        Bounds = new Rectangle(x, b.Top, w, h);
+            // a pill on the left end of the taskbar; cards open upwards from it
+            var wa = screen.WorkingArea;
+            taskbarH = wa.Bottom < b.Bottom ? (b.Bottom - wa.Bottom) / scale : 48;
+            Bounds = new Rectangle(b.Left, b.Bottom - h, w, h);
+        }
+        else
+        {
+            int x = Store.Position switch
+            {
+                "left" => b.Left,
+                "right" => b.Right - w,
+                _ => b.Left + (b.Width - w) / 2,
+            };
+            Bounds = new Rectangle(x, b.Top, w, h);
+        }
+        if (ready) Post(new { t = "place", tb = Math.Round(taskbarH) });
     }
+    double taskbarH = 48;
 
     protected override async void OnLoad(EventArgs e)
     {
@@ -199,6 +228,7 @@ sealed class GlanceForm : Form
             Web.Configure(core);
             if (Zoom != 1f) web.ZoomFactor = Zoom;
             core.WebMessageReceived += OnWebMessage;
+            core.ProcessFailed += OnWebProcessFailed;
             core.Navigate("https://glance.local/index.html");
         }
         catch (Exception ex)
@@ -214,6 +244,74 @@ sealed class GlanceForm : Form
         try { media = new MediaService(this, Post); await media.InitAsync(); } catch { media = null; }
         calendar = new CalendarService(Http, Post);
         calendar.Start(Store.IcalUrls);
+
+        fullscreen = new FullscreenWatcher(CurrentScreen);
+        fullscreen.Changed += on => { if (IsHandleCreated) BeginInvoke(() => OnFullscreen(on)); };
+        fullscreen.Start();
+        bluetooth = new BluetoothWatcher(Post);
+        bluetooth.Start();
+        Pharaoh = await Licenses.HasPharaohAsync(Handle);
+        SendLicense();
+    }
+
+    Screen CurrentScreen() => Screen.AllScreens.FirstOrDefault(s => s.DeviceName == Store.Monitor) ?? Screen.PrimaryScreen ?? Screen.AllScreens[0];
+
+    // Games, full-screen videos and presentations: fade the widget away and let every click through.
+    void OnFullscreen(bool on)
+    {
+        bool hide = on && Store.AutoHide;
+        if (hide == hiddenForFullscreen) return;
+        hiddenForFullscreen = hide;
+        Log("fullscreen " + (hide ? "hide" : "show"));
+        if (hide) SetClickThrough(true);
+        Post(new { t = "fs", v = hide });
+    }
+
+    void SendLicense()
+    {
+        Post(new { t = "lic", pharaoh = Pharaoh, store = AppInfo.IsPackaged });
+        settingsWindow?.PushInit();
+    }
+
+    public async void BuyPharaoh()
+    {
+        if (await Licenses.BuyPharaohAsync(Handle)) Pharaoh = true;
+        else Pharaoh = await Licenses.HasPharaohAsync(Handle);
+        SendLicense();
+    }
+
+    // The page's renderer can die (driver resets, sleep/resume, low memory). Bring it back instead of leaving an empty window.
+    void OnWebProcessFailed(object? sender, CoreWebView2ProcessFailedEventArgs e)
+    {
+        Log($"webview process failed: {e.ProcessFailedKind} {e.Reason}");
+        ready = false;
+        if (e.ProcessFailedKind == CoreWebView2ProcessFailedKind.BrowserProcessExited)
+        {
+            // the whole browser is gone: start a fresh copy of the app
+            try
+            {
+                if (Environment.ProcessPath is string exe)
+                {
+                    tray.Visible = false;
+                    Process.Start(new ProcessStartInfo(exe) { UseShellExecute = true, Arguments = "--restart" });
+                }
+            }
+            catch { }
+            Application.Exit();
+            return;
+        }
+        BeginInvoke(() => { try { web.CoreWebView2?.Reload(); } catch { } });
+    }
+
+    public static void Crash(string kind, Exception? ex)
+    {
+        try
+        {
+            var path = Path.Combine(SettingsStore.DataDir, "crash.log");
+            if (File.Exists(path) && new FileInfo(path).Length > 256 * 1024) File.Delete(path);
+            File.AppendAllText(path, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} [{kind}] v{Web.Version}\n{ex}\n\n");
+        }
+        catch { }
     }
 
     public void Post(object msg)
@@ -233,13 +331,20 @@ sealed class GlanceForm : Form
         {
             case "ready":
                 ready = true;
+                // placement, license and restart state first: the settings message starts the widget
+                Post(new { t = "place", tb = Math.Round(taskbarH), restarted = Program.Restarted });
+                Post(new { t = "lic", pharaoh = Pharaoh, store = AppInfo.IsPackaged });
                 SendSettings();
                 lastVol = -1; PollVolume();
                 media?.ForceResend();
                 calendar?.Resend();
+                Post(new { t = "fs", v = hiddenForFullscreen });
                 break;
             case "hit":
-                if (!focusable) SetClickThrough(!(bool)n["v"]!);
+                if (!focusable && !hiddenForFullscreen) SetClickThrough(!(bool)n["v"]!);
+                break;
+            case "buy":
+                BuyPharaoh();
                 break;
             case "fetch":
                 _ = Web.Fetch(Http, (int)n["id"]!, (string)n["url"]!, Post);
@@ -267,7 +372,8 @@ sealed class GlanceForm : Form
     }
 
     static readonly string? LogPath = Environment.GetEnvironmentVariable("FOCUSGLANCE_LOG");
-    static void Log(string s)
+    public static bool Logging => LogPath != null;
+    public static void Log(string s)
     {
         if (LogPath == null) return;
         try { File.AppendAllText(LogPath, $"{DateTime.Now:HH:mm:ss.fff} {s}\n"); } catch { }
@@ -339,7 +445,8 @@ sealed class GlanceForm : Form
     void PollVolume()
     {
         if (!ready) return;
-        if (++ticks % 40 == 0) // every ~5s: stay above other topmost windows
+        // stay above other topmost windows: every ~5s, or twice a second in the taskbar (clicking the taskbar raises it)
+        if (++ticks % (Store.Position == "taskbar" ? 4 : 40) == 0)
             Native.SetWindowPos(Handle, Native.HWND_TOPMOST, 0, 0, 0, 0, Native.SWP_NOMOVE | Native.SWP_NOSIZE | Native.SWP_NOACTIVATE);
         var v = volume.Read();
         if (v == null) return;
@@ -493,6 +600,7 @@ sealed class SettingsWindow : Form
         data = owner.Store.Data,
         version = Web.Version,
         store = AppInfo.IsPackaged,
+        pharaoh = owner.Pharaoh,
         links = new
         {
             repo = AppInfo.RepoUrl,
@@ -528,6 +636,9 @@ sealed class SettingsWindow : Form
                 break;
             case "pick-sound":
                 PickSound();
+                break;
+            case "buy":
+                owner.BuyPharaoh();
                 break;
             case "open":
                 var url = (string?)n["url"];
