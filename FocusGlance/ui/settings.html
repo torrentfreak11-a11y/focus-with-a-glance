@@ -167,7 +167,7 @@ const ST = {
     btOverlay: 'Bluetooth devices', btOverlayD: 'Show the device name, battery and volume when headphones or other devices connect.',
     theme: 'Theme', thGlass: 'Liquid glass', thPharaoh: 'Pharaonic', glyphs: 'Hieroglyphs', glyphsD: 'Decorative hieroglyphs beside English, and your name in a cartouche.',
     pharaohPack: 'Pharaonic pack', pharaohD: 'Coptic calendar, a lapis-and-gold Pharaonic theme, hieroglyph decorations and your name in a cartouche.',
-    buy: 'Get it', owned: 'Unlocked — thank you!', inStore: 'Available in the Microsoft Store version.', locked: '🔒',
+    thSounds: 'Theme sounds', thSoundsD: 'A soft desert-wind whoosh when the sand moves.', buy: 'Get it', owned: 'Unlocked — thank you!', inStore: 'Available in the Microsoft Store version.', locked: '🔒',
   },
   zh: {
     general: '常规', cards: '卡片', prayer: '礼拜时间', adhan: '宣礼与斋月', currency: '货币', hijri: '日历',
@@ -224,7 +224,7 @@ const ST = {
     btOverlay: '蓝牙设备', btOverlayD: '耳机或其他设备连接时，显示设备名称、电量和音量。',
     theme: '主题', thGlass: '液态玻璃', thPharaoh: '法老', glyphs: '象形文字', glyphsD: '在英文旁加入装饰性象形文字，并把你的名字写进王名圈。',
     pharaohPack: '法老扩展包', pharaohD: '科普特历、青金石与黄金的法老主题、象形文字装饰，以及写进王名圈的名字。',
-    buy: '获取', owned: '已解锁——谢谢你！', inStore: '在 Microsoft Store 版本中提供。', locked: '🔒',
+    thSounds: '主题音效', thSoundsD: '沙子移动时伴随轻柔的沙漠风声。', buy: '获取', owned: '已解锁——谢谢你！', inStore: '在 Microsoft Store 版本中提供。', locked: '🔒',
   },
   ar: {
     general: 'عام', cards: 'البطاقات', prayer: 'أوقات الصلاة', adhan: 'الأذان ورمضان', currency: 'العملات', hijri: 'التقاويم',
@@ -282,7 +282,7 @@ const ST = {
     btOverlay: 'أجهزة البلوتوث', btOverlayD: 'عرض اسم الجهاز والبطارية ومستوى الصوت عند توصيل السماعات أو غيرها.',
     theme: 'المظهر', thGlass: 'زجاج سائل', thPharaoh: 'فرعوني', glyphs: 'الهيروغليفية', glyphsD: 'زخارف هيروغليفية بجانب الإنجليزية، واسمك داخل خرطوش.',
     pharaohPack: 'الباقة الفرعونية', pharaohD: 'التقويم القبطي، ومظهر فرعوني باللازورد والذهب، وزخارف هيروغليفية، واسمك داخل خرطوش.',
-    buy: 'احصل عليها', owned: 'مفعّلة — شكراً لك!', inStore: 'متاحة في نسخة متجر Microsoft.', locked: '🔒',
+    thSounds: 'أصوات المظهر', thSoundsD: 'صوت ريح صحراوية خفيف مع حركة الرمال.', buy: 'احصل عليها', owned: 'مفعّلة — شكراً لك!', inStore: 'متاحة في نسخة متجر Microsoft.', locked: '🔒',
   },
 };
 const s = k => (ST[LANG] && ST[LANG][k]) ?? ST.en[k] ?? k;
@@ -441,7 +441,7 @@ const SECTIONS = [
 
   ['look', '🎨', () => head(s('look'), s('lookLead')) + card(
     row(s('theme'), '', seg('theme', [['glass', s('thGlass')], ['pharaoh', '𓋹 ' + s('thPharaoh'), 1]])),
-    cfg.theme === 'pharaoh' && lic.pharaoh ? row(s('glyphs'), s('glyphsD'), toggle('glyphs')) : '',
+    cfg.theme === 'pharaoh' && lic.pharaoh ? row(s('glyphs'), s('glyphsD'), toggle('glyphs')) + row(s('thSounds'), s('thSoundsD'), toggle('themeSounds')) : '',
     row(s('accent'), '',`<div class="sws">${ACCENTS.map(c => `<button class="swatch ${cfg.accent === c ? 'on' : ''}" style="background:${c}" data-act="set" data-k="accent" data-v="${c}"></button>`).join('')}</div>`),
     row(s('glass'), '', `<div class="sws">${GLASSES.map(([c, n]) => `<button class="swatch ${cfg.glass === c ? 'on' : ''}" title="${n}" style="background:${c}" data-act="set" data-k="glass" data-v="${c}"></button>`).join('')}</div>`),
     row(s('tint'), s('tintD'), range('tint', 0, 80, 2))) +

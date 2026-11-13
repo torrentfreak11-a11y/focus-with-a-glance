@@ -23,7 +23,7 @@ const DEFAULTS = {
   // v2.2
   calendar: { primary: 'gregory', extra: 'islamic' },   // extra: none | islamic | chinese | gregory | coptic
   compactWeather: true, autoHide: true, btOverlay: true,
-  theme: 'glass', glyphs: true,                           // theme: glass | pharaoh (Pharaonic pack)
+  theme: 'glass', glyphs: true, themeSounds: true,        // theme: glass | pharaoh (Pharaonic pack)
 };
 const CAL_LOCKED = ['coptic'];   // calendars that need the Pharaonic pack
 

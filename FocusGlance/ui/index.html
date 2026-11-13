@@ -89,7 +89,10 @@ svg{display:block}
 .ib{position:absolute;width:20px;height:20px;border-radius:10px;color:var(--fg2)}
 .ib:hover{background:rgba(255,255,255,.16);color:#fff}
 .ib svg{width:13px;height:13px}
-.gear{inset-inline-end:6px;bottom:6px}
+.gear{inset-inline-end:24px;top:4px}
+.cardgl{position:absolute;right:48px;top:6px}
+.full .ttl{padding-inline-end:46px}
+.mfull .info{padding-inline-end:22px}
 .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px 4px;margin-top:4px}
 .pgrid div{display:flex;flex-direction:column;align-items:center;font-size:8.5px;line-height:1.15;color:var(--fg2);padding:1px 2px;border-radius:6px}
 [dir=rtl] .pgrid div{font-size:9.5px}
@@ -169,8 +172,8 @@ svg{display:block}
 
 /* animated weather glyph beside the compact clock */
 .wxg{width:20px;height:20px;overflow:visible;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.45))}
-.wxg .rays{transform-origin:10px 10px;animation:spin 16s linear infinite}
-.wxg .drift{animation:drift 3.6s ease-in-out infinite alternate}
+.wxg .rays{transform-origin:10px 10px;animation:spin 9s linear infinite}
+.wxg .drift{animation:drift 2.8s ease-in-out infinite alternate}
 .wxg .drop{animation:drop 1.05s linear infinite}
 .wxg .flake{animation:flake 2.6s linear infinite}
 .wxg .bolt{animation:bolt 2.8s infinite}
@@ -178,13 +181,41 @@ svg{display:block}
 .wxg .star{animation:tw 2.4s ease-in-out infinite}
 .wxg .gust{stroke-dasharray:9 14;animation:gust 1.6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes drift{from{transform:translateX(-.8px)}to{transform:translateX(1.2px)}}
+@keyframes drift{from{transform:translate(-1.8px,.3px)}to{transform:translate(1.8px,-.6px)}}
 @keyframes drop{0%{transform:translateY(-1px);opacity:0}20%{opacity:1}100%{transform:translateY(6px);opacity:0}}
 @keyframes flake{0%{transform:translate(0,-1px);opacity:0}25%{opacity:1}100%{transform:translate(1px,6px);opacity:0}}
 @keyframes bolt{0%,62%,72%,100%{opacity:0}64%,70%{opacity:1}}
 @keyframes fogl{from{transform:translateX(-1.5px)}to{transform:translateX(1.5px)}}
 @keyframes tw{0%,100%{opacity:.25}50%{opacity:1}}
 @keyframes gust{to{stroke-dashoffset:-23}}
+
+/* live weather scene inside the full weather card */
+.wxfx{position:absolute;inset:0;overflow:hidden;pointer-events:none;border-radius:inherit}
+.layer>.full>*:not(.wxfx):not(.gear):not(.cardgl){position:relative}
+.wxbig .wxg{width:34px;height:34px}
+.wx{gap:7px}
+.wx dd{white-space:nowrap}
+.wx dl{font-size:9.5px}
+.wxfx .rd{position:absolute;top:-24px;width:1.2px;height:15px;border-radius:1px;background:linear-gradient(transparent,rgba(170,215,255,.85));animation:rainf linear infinite}
+.wxfx .sn{position:absolute;top:-8px;width:3.4px;height:3.4px;border-radius:50%;background:rgba(255,255,255,.9);animation:snowf linear infinite}
+.wxfx .st{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;box-shadow:0 0 4px #fff;animation:tw 2.6s ease-in-out infinite}
+.wxfx .cl{position:absolute;height:26px;border-radius:20px;background:rgba(235,242,255,.16);filter:blur(5px);animation:cloudf linear infinite}
+.wxfx .fg{position:absolute;left:-40%;width:180%;height:14px;border-radius:10px;background:rgba(230,236,245,.14);filter:blur(4px);animation:fogf ease-in-out infinite alternate}
+.wxfx .wd{position:absolute;left:-40%;height:1.4px;width:40px;border-radius:1px;background:linear-gradient(90deg,transparent,rgba(240,246,255,.7),transparent);animation:windf linear infinite}
+.wxfx .sun{position:absolute;inset-inline-end:-38px;top:-46px;width:150px;height:150px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,216,96,.55) 0%,rgba(255,200,80,.18) 38%,transparent 66%);animation:sunp 4.5s ease-in-out infinite}
+.wxfx .rays{position:absolute;inset-inline-end:-58px;top:-66px;width:190px;height:190px;border-radius:50%;
+  background:repeating-conic-gradient(rgba(255,222,120,.14) 0 6deg,transparent 6deg 22deg);
+  -webkit-mask-image:radial-gradient(circle,#000 20%,transparent 68%);animation:spin 40s linear infinite}
+.wxfx .moon{position:absolute;inset-inline-end:-26px;top:-30px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(220,230,255,.32),transparent 62%);animation:sunp 6s ease-in-out infinite}
+.wxfx .fl{position:absolute;inset:0;background:rgba(220,230,255,.55);opacity:0;animation:flash 6s infinite}
+@keyframes rainf{from{transform:translate(0,0) rotate(14deg)}to{transform:translate(-26px,150px) rotate(14deg)}}
+@keyframes snowf{0%{transform:translate(0,0)}50%{transform:translate(6px,60px)}100%{transform:translate(-2px,125px)}}
+@keyframes cloudf{from{transform:translateX(-130px)}to{transform:translateX(260px)}}
+@keyframes fogf{from{transform:translateX(-12%)}to{transform:translateX(12%)}}
+@keyframes windf{from{transform:translateX(0)}to{transform:translateX(340px)}}
+@keyframes sunp{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.12);opacity:1}}
+@keyframes flash{0%,86%,90%,94%,100%{opacity:0}87%,92%{opacity:.8}}
 
 /* bluetooth device overlay */
 .bt .lbl{max-width:118px}
@@ -206,6 +237,10 @@ svg{display:block}
 .cart{display:inline-flex;align-items:center;gap:1px;padding:1px 9px 1px 7px;border-radius:999px;font-family:"Segoe UI Historic",sans-serif;
   font-size:14px;line-height:1.2;color:var(--acc);box-shadow:inset 0 0 0 1.4px var(--acc);position:relative;text-shadow:none}
 .cart::after{content:"";position:absolute;right:-4px;top:2px;bottom:2px;width:2px;border-radius:1px;background:var(--acc)}
+#sandc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.cart i{font-style:normal;display:inline-block;opacity:0;animation:glyphIn .55s var(--ease) forwards}
+@keyframes glyphIn{from{opacity:0;transform:translateY(-5px) scale(.8);filter:blur(2px)}to{opacity:1;transform:none;filter:none}}
+.hello .cart{font-size:16px}
 .gl{font-family:"Segoe UI Historic",sans-serif;font-size:16px;line-height:0;vertical-align:-2px;color:var(--acc);text-shadow:none;margin-inline-end:4px;letter-spacing:0}
 [data-theme=pharaoh]{--acc:#e8c46a;--acc2:#f3d98c}
 [data-theme=pharaoh] #sheen{background:
@@ -234,6 +269,27 @@ svg{display:block}
     <feComponentTransfer in="g" result="fill"><feFuncA id="tintA" type="linear" slope=".42"/></feComponentTransfer>
     <feMerge><feMergeNode in="shadow"/><feMergeNode in="fill"/><feMergeNode in="rim"/></feMerge>
   </filter>
+  <!-- Pharaonic pack: the same liquid shapes, but with grainy edges and sand specks, like packed desert sand -->
+  <filter id="sand" x="-10%" y="-20%" width="120%" height="160%" color-interpolation-filters="sRGB">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b"/>
+    <feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -10" result="g0"/>
+    <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="3" result="noise"/>
+    <feDisplacementMap in="g0" in2="noise" scale="2.6" xChannelSelector="R" yChannelSelector="G" result="g"/>
+    <feMorphology in="g" operator="erode" radius="1.2" result="er"/>
+    <feComposite in="g" in2="er" operator="out" result="ring"/>
+    <feFlood flood-color="#e8c46a" flood-opacity=".85"/>
+    <feComposite in2="ring" operator="in" result="rim"/>
+    <feGaussianBlur in="g" stdDeviation="5" result="sb"/>
+    <feOffset in="sb" dy="3" result="so"/>
+    <feFlood flood-color="#000000" flood-opacity=".28"/>
+    <feComposite in2="so" operator="in" result="sh1"/>
+    <feComposite in="sh1" in2="g" operator="out" result="shadow"/>
+    <feComponentTransfer in="g" result="fill"><feFuncA id="tintS" type="linear" slope=".42"/></feComponentTransfer>
+    <feColorMatrix in="noise" type="matrix" values="0 0 0 0 1  0 0 0 0 .9  0 0 0 0 .66  0 0 0 -3 1.75" result="specks"/>
+    <feComposite in="specks" in2="g" operator="in" result="grain"/>
+    <feComponentTransfer in="grain" result="grain2"><feFuncA type="linear" slope=".35"/></feComponentTransfer>
+    <feMerge><feMergeNode in="shadow"/><feMergeNode in="fill"/><feMergeNode in="grain2"/><feMergeNode in="rim"/></feMerge>
+  </filter>
 </svg>
 
 <div id="stage">
@@ -244,6 +300,7 @@ svg{display:block}
     <div class="blob" id="bA"></div>
     <div class="blob" id="bB"></div>
   </div>
+  <canvas id="sandc"></canvas>
   <div class="glassy" id="sheen"></div>
   <div id="content"></div>
   <button id="handle" class="hidden" data-hit data-act="toggle" title=""><span><i></i><i></i></span></button>
@@ -274,7 +331,8 @@ const IC = {
   chevL:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
   chevR:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
   pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-3.5 4h11L14 9V3M12 13v8"/></svg>',
-  gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="3.3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>',
+  // a standard cog (the old one looked like a sun next to the weather icons)
+  gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>',
   spk:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12.5 5v14l-5-4.5H4z" fill="currentColor"/><path d="M16 9a4 4 0 0 1 0 6M18.6 6.5a7.5 7.5 0 0 1 0 11"/></svg>',
   mute:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12.5 5v14l-5-4.5H4z" fill="currentColor"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg>',
   swap:'<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:-1px"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/></svg>',
@@ -344,19 +402,87 @@ function applyLook() {
   document.getElementById('tintA').setAttribute('slope', String(Math.max(0, TB() ? Math.max(cfg.tint, 88) : cfg.tint) / 100));
   const ph = pharaoh(), r = document.documentElement.style;
   document.documentElement.dataset.theme = ph ? 'pharaoh' : 'glass';
-  // the Pharaonic pack paints the glass in lapis lazuli with a gold rim
-  r.setProperty('--acc', ph ? '#e8c46a' : cfg.accent); r.setProperty('--glass', ph ? '#0a1a4a' : cfg.glass);
+  // the Pharaonic pack: translucent desert-sand glass with grainy edges and a gold rim
+  r.setProperty('--acc', ph ? '#e8c46a' : cfg.accent); r.setProperty('--glass', ph ? '#8a6636' : cfg.glass);
+  $('#goo').style.filter = ph ? 'url(#sand)' : '';
+  document.getElementById('tintS').setAttribute('slope', document.getElementById('tintA').getAttribute('slope'));
   const rim = document.getElementById('rimC');
   rim.setAttribute('flood-color', ph ? '#e8c46a' : '#ffffff'); rim.setAttribute('flood-opacity', ph ? '.85' : '.55');
 }
 // decorative hieroglyph before a card title (Pharaonic pack only)
 const gl = g => pharaoh() && cfg.glyphs ? `<span class="gl">${g}</span>` : '';
+
+/* ------------------------------------------------------------------ Pharaonic sand */
+// Grains of sand drawn on a canvas above the glass: poured, scattered by the wind, or gathered into a shape.
+const SAND = { parts: [], raf: 0 };
+const SAND_COLORS = ['#f3e2b4', '#e9cf94', '#d9b56e', '#c99a52', '#b98a48'];
+const rnd = (a, b) => a + Math.random() * (b - a);
+function sandEmit(list) {
+  if (!pharaoh()) return;
+  SAND.parts.push(...list);
+  if (!SAND.raf) SAND.raf = requestAnimationFrame(sandTick);
+}
+function sandTick() {
+  const c = $('#sandc'), d = devicePixelRatio || 1;
+  if (c.width !== Math.round(innerWidth * d) || c.height !== Math.round(innerHeight * d)) { c.width = Math.round(innerWidth * d); c.height = Math.round(innerHeight * d); }
+  const g = c.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); g.clearRect(0, 0, innerWidth, innerHeight);
+  SAND.parts = SAND.parts.filter(p => {
+    if (p.wait > 0) { p.wait--; return true; }
+    p.age++;
+    if (p.tx != null) { const k = Math.min(1, p.age / p.max), e = 1 - Math.pow(1 - k, 3); p.x = p.sx + (p.tx - p.sx) * e; p.y = p.sy + (p.ty - p.sy) * e; }
+    else { p.vx += p.ax; p.vy += p.ay; p.x += p.vx; p.y += p.vy; }
+    if (p.floor != null && p.y >= p.floor) return false;
+    const a = p.age > p.max ? 0 : Math.min(1, (p.max - p.age) / (p.max * .35));
+    if (a <= 0) return false;
+    g.globalAlpha = a; g.fillStyle = p.col; g.fillRect(p.x, p.y, p.s, p.s);
+    return true;
+  });
+  g.globalAlpha = 1;
+  SAND.raf = SAND.parts.length ? requestAnimationFrame(sandTick) : 0;
+  if (!SAND.raf) g.clearRect(0, 0, innerWidth, innerHeight);
+}
+const grain = o => ({ wait: 0, age: 0, max: 60, ax: 0, ay: 0, vx: 0, vy: 0, s: rnd(.8, 1.7), col: SAND_COLORS[(Math.random() * SAND_COLORS.length) | 0], ...o });
+// a thin stream pouring from (x, y0) down to y1, like an hourglass
+function sandPour(x, y0, y1, n = 140, spread = 3) {
+  sandEmit(Array.from({ length: n }, (_, i) => grain({ x: x + rnd(-spread, spread), y: y0, vx: rnd(-.15, .15), vy: rnd(.6, 1.6), ay: .22, floor: y1 + rnd(-4, 2), max: 90, wait: (i * .45) | 0 })));
+}
+// the wind carries grains off one side of a shape
+function sandBurst(R, dir = 1, n = 120) {
+  const edge = dir > 0 ? R.x : R.x + R.w;
+  sandEmit(Array.from({ length: n }, () => grain({ x: edge + rnd(-6, R.w * .35) * (dir > 0 ? 1 : -1), y: R.y + rnd(2, R.h - 2), vx: -dir * rnd(.8, 3.2), vy: rnd(-.6, .3), ay: .05, max: rnd(30, 60) })));
+}
+// grains swirl in from around a shape and settle into it
+function sandAssemble(R, n = 160) {
+  sandEmit(Array.from({ length: n }, () => {
+    const tx = R.x + rnd(4, R.w - 4), ty = R.y + rnd(3, R.h - 3), ang = rnd(0, Math.PI * 2), dist = rnd(30, 80);
+    return grain({ sx: tx + Math.cos(ang) * dist, sy: ty + Math.sin(ang) * dist * .6, tx, ty, x: 0, y: 0, max: rnd(32, 48), wait: (Math.random() * 10) | 0 });
+  }));
+}
+// soft desert wind: filtered noise sweeping up and down, panned across
+function whoosh(strength = 1) {
+  if (!pharaoh() || !cfg.themeSounds) return;
+  try {
+    const ac = chime.ac || (chime.ac = new AudioContext());
+    if (ac.state === 'suspended') ac.resume();
+    const len = .95, buf = ac.createBuffer(1, ac.sampleRate * len, ac.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const src = ac.createBufferSource(); src.buffer = buf;
+    const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = .8;
+    const t0 = ac.currentTime;
+    bp.frequency.setValueAtTime(260, t0); bp.frequency.exponentialRampToValueAtTime(1900, t0 + len * .45); bp.frequency.exponentialRampToValueAtTime(420, t0 + len);
+    const gn = ac.createGain(); gn.gain.setValueAtTime(.0001, t0);
+    gn.gain.exponentialRampToValueAtTime(.11 * strength, t0 + len * .4); gn.gain.exponentialRampToValueAtTime(.0001, t0 + len);
+    const pan = ac.createStereoPanner(); pan.pan.setValueAtTime(-.6, t0); pan.pan.linearRampToValueAtTime(.6, t0 + len);
+    src.connect(bp); bp.connect(gn); gn.connect(pan); pan.connect(ac.destination); src.start(t0); src.stop(t0 + len);
+  } catch { }
+}
 function onSettings(data) {
   const prev = cfg;
   cfg = merge(DEFAULTS, data);
   applyLook();
   if (S.mode === 'boot') { start(); return; }
   const ch = k => JSON.stringify(getPath(prev, k)) !== JSON.stringify(getPath(cfg, k));
+  if (ch("position") && pharaoh()) setTimeout(() => { sandAssemble(visRect(), 220); whoosh(); }, 120);
   if (ch('location')) refreshLocation();
   else if (ch('prayer.method') || ch('prayer.school') || ch('prayer.tune')) loadPrayer();
   if (ch('fx')) { S.fx = null; loadFx(); }
@@ -444,7 +570,21 @@ function view() {
   if (S.mode === 'compact' && S.alert) return { key: 'alert:' + S.alert.id, full: false, html: alertHTML() };
   const full = S.mode === 'full';
   const fn = (full ? FULLV : COMPV)[S.card] || COMPV.clock;
-  return { key: S.mode + ':' + S.card, full, ltr: S.card === 'media' && !full, html: fn() };
+  let html = fn();
+  if (full) html = decorateCard(S.card, html);
+  return { key: S.mode + ':' + S.card, full, ltr: S.card === 'media' && !full, html };
+}
+// Every full card gets the settings cog (top corner, beside the dots) and, in the Pharaonic theme, its own emblem.
+const CARD_SECTION = { clock: 'general', hijri: 'hijri', prayer: 'prayer', ramadan: 'adhan', fx: 'currency', weather: 'general', world: 'world', events: 'events', focus: 'focus', meet: 'meet', media: 'cards' };
+const CARD_GLYPH = { clock: '𓇳', hijri: '𓆳', prayer: '𓇼', ramadan: '𓇹', fx: '𓋞', weather: '𓇯', world: '𓇾', events: '𓋹', focus: '𓂀', meet: '𓀁', media: '𓄤' };
+function decorateCard(card, html) {
+  html = html.replace(/<button class="ib gear"[^>]*>[\s\S]*?<\/button>/g, '');
+  const i = html.lastIndexOf('</div>');
+  if (i >= 0) html = html.slice(0, i) + gearBtn(CARD_SECTION[card] || '') + html.slice(i);
+  const g = gl(CARD_GLYPH[card] || '');
+  if (g) html = html.includes('<div class="ttl">') ? html.replace('<div class="ttl">', '<div class="ttl">' + g)
+    : html.replace('<div class="full" dir="ltr">', `<div class="full" dir="ltr"><span class="gl cardgl">${CARD_GLYPH[card]}</span>`);
+  return html;
 }
 function swapLayer(v, cls = 'in') {
   if (curLayer) { const old = curLayer; old.className += ' out'; setTimeout(() => old.remove(), 260); }
@@ -749,7 +889,7 @@ function onboardHTML() {
 }
 function helloHTML() {
   const name = pharaoh() && cfg.glyphs && toGlyphs(cfg.name)
-    ? `<b>${esc(cfg.name)}</b> <span class="cart" title="${esc(cfg.name)}">${toGlyphs(cfg.name)}</span>` : `<b>${esc(cfg.name)}</b>`;
+    ? `<b>${esc(cfg.name)}</b> <span class="cart" title="${esc(cfg.name)}">${[...toGlyphs(cfg.name)].map((g, i) => `<i style="animation-delay:${(.35 + i * .16).toFixed(2)}s">${g}</i>`).join("")}</span>` : `<b>${esc(cfg.name)}</b>`;
   return `<div class="row"><span class="hello">${t('hello')} ${name}</span>` +
          `<button class="wave" data-hit data-act="wave" title="${t('waveBack')}">👋</button></div>`;
 }
@@ -843,6 +983,26 @@ function wxGlyph(w) {
   return `<svg class="wxg" viewBox="0 0 20 20"${windy ? ' style="margin-inline-start:5px"' : ''}>${gust}${g}</svg>`;
 }
 
+// The weather playing out inside the card. Positions come from the index (not random) so the markup is stable
+// between renders and the animations never restart.
+function wxScene(w) {
+  if (!w) return '';
+  const c = +w.c.weather_code, day = !!w.c.is_day, windy = (+w.c.wind_speed_10m || 0) >= 28;
+  const P = (i, m) => (i * 37 + 11) % m, n = (k, f) => Array.from({ length: k }, (_, i) => f(i)).join('');
+  let s = '';
+  const clouds = (k, o = 1) => n(k, i => `<i class="cl" style="top:${8 + P(i, 50)}px;width:${70 + P(i, 50)}px;opacity:${o};animation-duration:${22 + P(i, 14)}s;animation-delay:-${P(i, 20)}s"></i>`);
+  const rain = (k, light) => n(k, i => `<i class="rd" style="left:${P(i * 3, 104)}%;animation-duration:${(light ? 1.1 : .62) + P(i, 5) * .07}s;animation-delay:-${(P(i, 10) / 10).toFixed(2)}s;${light ? 'opacity:.5' : ''}"></i>`);
+  if (c === 0) s = day ? '<i class="rays"></i><i class="sun"></i>' : '<i class="moon"></i>' + n(14, i => `<i class="st" style="left:${P(i * 7, 96)}%;top:${P(i * 5, 80)}%;animation-delay:-${(P(i, 24) / 10).toFixed(1)}s"></i>`);
+  else if (c <= 3) s = (c <= 2 ? (day ? '<i class="sun" style="opacity:.6"></i>' : '<i class="moon"></i>') : '') + clouds(c === 3 ? 4 : 3);
+  else if (c <= 48) s = n(4, i => `<i class="fg" style="top:${14 + i * 20}px;animation-duration:${5 + i * 1.4}s;animation-delay:-${i}s"></i>`);
+  else if (c <= 57) s = clouds(2, .7) + rain(12, true);
+  else if (c <= 67 || (c >= 80 && c <= 82)) s = clouds(2, .7) + rain(26);
+  else if (c <= 77 || (c >= 85 && c <= 86)) s = clouds(2, .6) + n(18, i => `<i class="sn" style="left:${P(i * 3, 100)}%;animation-duration:${4 + P(i, 4)}s;animation-delay:-${P(i, 6)}s"></i>`);
+  else s = clouds(3, .8) + rain(22) + '<i class="fl"></i>';
+  if (windy) s += n(6, i => `<i class="wd" style="top:${10 + P(i * 3, 70)}%;animation-duration:${1.1 + P(i, 4) * .25}s;animation-delay:-${(P(i, 9) / 5).toFixed(1)}s"></i>`);
+  return `<div class="wxfx">${s}</div>`;
+}
+
 const COMPV = {
   clock: () => `<div class="row">${pharaoh() && cfg.glyphs ? '<span class="gl" style="font-size:15px">𓇳</span>' : ''}<span class="digits">${fmt(new Date(), cfg.showSeconds)}</span>${cfg.compactWeather && cfg.cards.weather ? wxGlyph(S.weather) : ''}</div>`,
   hijri: () => `<div class="row"><span class="ic">${CAL_ICON[altCal()]}</span><span class="lbl" style="color:#fff">${esc(calText(new Date(), altCal(), cfg, 'short'))}</span></div>`,
@@ -891,14 +1051,14 @@ const FULLV = {
     const prim = calOk(cfg.calendar.primary) ? cfg.calendar.primary : 'gregory', ex = cfg.calendar.extra;
     const line1 = prim === 'gregory' ? date : calText(d, prim, cfg, 'weekday');
     const line2 = ex !== 'none' && ex !== prim && calOk(ex) ? calText(d, ex, cfg) : (prim !== 'gregory' ? date : '');
-    return `<div class="full"><div class="ttl">${gl('𓇳')}${esc(S.loc?.city || t('localTime'))}</div>` +
+    return `<div class="full"><div class="ttl">${esc(S.loc?.city || t('localTime'))}</div>` +
       `<div class="bignum"><span style="direction:ltr;unicode-bidi:isolate">${fmt(d, false)}<small>${cfg.showSeconds ? ':' + pad(d.getSeconds()) : ''}</small></span>${cfg.use24h ? '' : `<small>${h >= 12 ? t('pm') : t('am')}</small>`}</div>` +
       `<div class="sub">${esc(line1)}</div>${line2 ? `<div class="sub">${esc(line2)}</div>` : ''}` + gearBtn() + `</div>`;
   },
   hijri: () => {
     const d = new Date(), cal = altCal();
     const nextOcc = cal === 'islamic' && cfg.islamicEvents ? islamicOccasions(cfg.hijri).find(o => o.at >= sod(d)) : null;
-    return `<div class="full"><div class="ttl">${gl(cal === 'coptic' ? '𓋹' : '𓇹')}${t('calTitle_' + cal)}</div>` +
+    return `<div class="full"><div class="ttl">${t('calTitle_' + cal)}</div>` +
       `<div class="hl" style="font-size:19px;margin-top:2px">${esc(calText(d, cal, cfg, 'short'))}</div>` +
       `<div class="sub">${esc(calText(d, cal, cfg, 'weekday'))}</div>` +
       `<div class="sub">${esc(cal === 'gregory' ? calText(d, 'islamic', cfg) : d.toLocaleDateString(gregLocale(), { day: 'numeric', month: 'long', year: 'numeric' }))}</div>` +
@@ -938,11 +1098,11 @@ const FULLV = {
   },
   weather: () => {
     if (!S.weather) return loadingFull(t('weather'));
-    const c = S.weather.c, [em, desc] = wxInfo(c.weather_code, c.is_day);
-    return `<div class="full"><div class="ttl">${esc(S.loc?.city || t('weather'))} · ${desc}</div>` +
-      `<div class="wx" style="margin-top:3px"><span class="em">${em}</span><div><div class="bignum" style="font-size:26px">${Math.round(c.temperature_2m)}°<small>C</small></div>` +
+    const c = S.weather.c, [, desc] = wxInfo(c.weather_code, c.is_day);
+    return `<div class="full">${wxScene(S.weather)}<div class="ttl">${esc(S.loc?.city || t('weather'))} · ${desc}</div>` +
+      `<div class="wx" style="margin-top:3px"><span class="wxbig">${wxGlyph(S.weather)}</span><div><div class="bignum" style="font-size:26px">${Math.round(c.temperature_2m)}°<small>C</small></div>` +
       `<div class="sub" style="font-size:10px">${t('hi')} ${Math.round(S.weather.max)}° · ${t('lo')} ${Math.round(S.weather.min)}°</div></div>` +
-      `<dl><dt>${t('feels')}</dt><dd>${Math.round(c.apparent_temperature)}°</dd><dt>${t('humid')}</dt><dd>${c.relative_humidity_2m}%</dd><dt>${t('wind')}</dt><dd>${Math.round(c.wind_speed_10m)} ${t('kmh')}</dd></dl></div></div>`;
+      `<dl><dt>${t('feels')}</dt><dd>${Math.round(c.apparent_temperature)}°</dd><dt>${t('humid')}</dt><dd>${c.relative_humidity_2m}%</dd><dt>${t('wind')}</dt><dd>${Math.round(c.wind_speed_10m)}<small style="font-size:7.5px;font-weight:600;opacity:.75;margin-inline-start:2px">${t("kmh")}</small></dd></dl></div></div>`;
   },
   world: () => {
     const now = new Date();
@@ -1037,11 +1197,14 @@ function enterFull() {
   S.overlay = null; S.alert = null; S.mode = 'full'; S.fullUntil = Date.now() + 3000;
   $('#stage').classList.remove('zoom');
   render(true);
+  if (pharaoh()) { setTimeout(() => sandAssemble(visRect(), 110), 60); whoosh(.5); }
 }
 function collapse() {
   if (S.mode !== 'full') return;
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  const was = visRect();
   S.mode = 'compact'; render(true);
+  if (pharaoh()) { sandBurst(was, TB() ? 1 : -1, 80); whoosh(.4); }
 }
 
 let animating = false;
@@ -1056,6 +1219,7 @@ async function liquidSwitch(dir, mutate) {
   $('#sheen').classList.add('off');
   layout();
   if (curLayer) { curLayer.style.transition = 'transform .3s ease, opacity .22s ease'; curLayer.style.transform = `translateX(${-dir * 26}px) scale(.92)`; curLayer.style.opacity = '0'; }
+  if (pharaoh()) { sandBurst(R, dir); whoosh(.7); }
   const squash = { x: cx - R.w * .41 - dir * 12, y: R.y + 5, w: R.w * .82, h: R.h - 10, r: R.r };
   const side = circ(cx + dir * (R.w / 2 + 34), cy, 46);
   const o1 = { duration: 300, easing: 'cubic-bezier(.45,0,.3,1)', fill: 'forwards' };
@@ -1128,6 +1292,8 @@ async function liquidPulse(once) {
   const R = visRect(), cx = R.x + R.w / 2, B = $('#bB');
   B.style.display = 'block';
   for (let i = 0; i < (once ? 1 : 2) && (once || S.alert); i++) {
+    // Pharaonic: a little sand trickles out with each pulse
+    if (pharaoh() && !TB()) sandPour(cx, R.y + R.h - 6, R.y + R.h + 34, 45, 2);
     const a = TB() ? [circ(cx, R.y + 13, 20), circ(cx, R.y - 16, 17)] : [circ(cx, R.y + R.h - 13, 20), circ(cx, R.y + R.h + 16, 17)];
     await B.animate([kf(a[0]), kf(a[1]), kf(a[0])],
       { duration: 760, easing: 'cubic-bezier(.45,0,.35,1.3)' }).finished;
@@ -1287,6 +1453,7 @@ async function dropIn(target) {
   measure();
   const R = visRect(), cx = CX();
   const M = $('#main'), B = $('#bB'), bar = $('#bar');
+  if (pharaoh()) { if (TB()) sandAssemble(R, 200); else sandPour(cx, 0, R.y + R.h, 170); whoosh(); }
   if (TB()) {   // taskbar: a bead of glass rises from the bottom edge and stretches into the pill
     M.style.transition = 'none'; css(M, circ(R.x + R.w / 2, innerHeight + 16, 22)); void M.offsetWidth; M.style.transition = '';
     $('#sheen').classList.add('off');
