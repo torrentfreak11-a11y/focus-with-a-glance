@@ -5,7 +5,7 @@ const DEFAULTS = {
   name: '', lang: 'en',
   use24h: false, showSeconds: true, startWithWindows: true, pinned: false,
   tint: 42, accent: '#8fdcff', glass: '#0c0e16', monitor: '', position: 'center',
-  cards: { hijri: false, prayer: true, fx: true, weather: true, world: false, events: true, focus: true, meet: true, media: true },
+  cards: { hijri: false, prayer: true, fx: true, weather: true, world: false, events: true, focus: true, meet: true, media: true, match: true },
   location: { mode: 'auto', city: '', lat: null, lon: null, cc: '' },
   prayer: { method: 'auto', school: 0, remindMin: 10, tune: { Fajr: 0, Sunrise: 0, Dhuhr: 0, Asr: 0, Maghrib: 0, Isha: 0 } },
   adhan: {
@@ -22,10 +22,20 @@ const DEFAULTS = {
   icalUrls: [],
   // v2.2
   calendar: { primary: 'gregory', extra: 'islamic' },   // extra: none | islamic | chinese | gregory | coptic
-  compactWeather: true, autoHide: true, btOverlay: true,
-  theme: 'glass', glyphs: true, themeSounds: true,        // theme: glass | pharaoh (Pharaonic pack)
+  compactWeather: true, autoHide: true, btOverlay: true, welcomeCard: true, screenTime: true, hourChime: false, weatherAlerts: true,
+  theme: 'glass', glyphs: true, themeSounds: true, avatar: 'pharaoh',        // theme: glass | pharaoh (Pharaonic pack)
+  // live football (ESPN; GitHub build only): followed competitions, favourite teams, one followed game
+  sports: { enabled: true, leagues: ['fifa.worldq.caf', 'caf.nations_qual', 'caf.nations', 'uefa.champions', 'eng.1', 'esp.1', 'ksa.1'], teams: [], onlyFavs: false, follow: '' },
 };
 const CAL_LOCKED = ['coptic'];   // calendars that need the Pharaonic pack
+// ESPN competition codes the app offers (all checked against the live feed)
+const LEAGUES = [
+  ['fifa.world', 'FIFA World Cup'], ['fifa.worldq.caf', 'World Cup qualifying · Africa'], ['fifa.worldq.afc', 'World Cup qualifying · Asia'],
+  ['fifa.worldq.uefa', 'World Cup qualifying · Europe'], ['caf.nations', 'Africa Cup of Nations'], ['caf.nations_qual', 'AFCON qualifying'],
+  ['caf.champions', 'CAF Champions League'], ['afc.asian.cup', 'AFC Asian Cup'], ['uefa.champions', 'UEFA Champions League'],
+  ['uefa.europa', 'UEFA Europa League'], ['eng.1', 'Premier League'], ['esp.1', 'LaLiga'], ['ita.1', 'Serie A'], ['ger.1', 'Bundesliga'],
+  ['fra.1', 'Ligue 1'], ['ksa.1', 'Saudi Pro League'], ['usa.1', 'MLS'], ['fifa.friendly', 'International friendlies'],
+];
 
 function merge(def, val) {
   if (Array.isArray(def)) return Array.isArray(val) ? val : JSON.parse(JSON.stringify(def));
@@ -68,7 +78,7 @@ const T = {
     chooseLang: 'Choose your language', addCal: 'Add a second calendar?', showPrayer: 'Show prayer times and adhan alerts?',
     yes: 'Yes', no: 'No thanks', calNone: 'None', calislamic: 'Hijri', calchinese: 'Chinese', calgregory: 'Gregorian', calcoptic: 'Coptic',
     calTitle_islamic: 'Hijri date', calTitle_chinese: 'Chinese calendar', calTitle_gregory: 'Gregorian date', calTitle_coptic: 'Coptic calendar',
-    btOn: 'Connected', btOff: 'Disconnected', battery: 'Battery',
+    btOn: 'Connected', btOff: 'Disconnected', battery: 'Battery', lyrics: 'Lyrics', gMorning: 'Good morning', gAfternoon: 'Good afternoon', gEvening: 'Good evening', gNight: 'Good night', screenTime: 'Screen time', mShort: 'min', rainAround: 'Rain around', snowAround: 'Snow around', stormAround: 'Storms around', wxWarn_storm: 'Thunderstorm expected', wxWarn_rain: 'Heavy rain expected', wxWarn_snow: 'Heavy snow expected', wxWarn_heat: 'Extreme heat', wxWarn_cold: 'Extreme cold', wxWarn_wind: 'Strong wind gusts', vs: 'vs', ft: 'FT', goal: 'GOAL!', openGate: 'Open the temple gate', kickoff: 'Kick-off', follow: 'Follow this game', unfollow: 'Unfollow', openMatch: 'Open match page',
   },
   zh: {
     hello: '你好', waveBack: '挥手回应', welcome: '欢迎使用', askName: '我该怎么称呼你？',
@@ -92,7 +102,7 @@ const T = {
     chooseLang: '选择你的语言', addCal: '添加第二种日历？', showPrayer: '显示礼拜时间和提醒？',
     yes: '好的', no: '不用了', calNone: '不添加', calislamic: '伊斯兰历', calchinese: '农历', calgregory: '公历', calcoptic: '科普特历',
     calTitle_islamic: '伊斯兰历', calTitle_chinese: '农历', calTitle_gregory: '公历', calTitle_coptic: '科普特历',
-    btOn: '已连接', btOff: '已断开', battery: '电量',
+    btOn: '已连接', btOff: '已断开', battery: '电量', lyrics: '歌词', gMorning: '早上好', gAfternoon: '下午好', gEvening: '晚上好', gNight: '夜深了', screenTime: '屏幕使用时间', mShort: '分钟', rainAround: '降雨预计于', snowAround: '降雪预计于', stormAround: '雷暴预计于', wxWarn_storm: '预计有雷暴', wxWarn_rain: '预计有大雨', wxWarn_snow: '预计有大雪', wxWarn_heat: '极端高温', wxWarn_cold: '极端低温', wxWarn_wind: '强阵风', vs: '对', ft: '完场', goal: '进球！', openGate: '打开神庙之门', kickoff: '开球', follow: '关注这场比赛', unfollow: '取消关注', openMatch: '打开比赛页面',
   },
   ar: {
     hello: 'أهلاً', waveBack: 'لوّح', welcome: 'مرحباً بك في Focus with a glance', askName: 'بماذا أناديك؟',
@@ -116,7 +126,7 @@ const T = {
     chooseLang: 'اختر لغتك', addCal: 'إضافة تقويم ثانٍ؟', showPrayer: 'عرض أوقات الصلاة وتنبيهات الأذان؟',
     yes: 'نعم', no: 'لا، شكراً', calNone: 'بدون', calislamic: 'الهجري', calchinese: 'الصيني', calgregory: 'الميلادي', calcoptic: 'القبطي',
     calTitle_islamic: 'التاريخ الهجري', calTitle_chinese: 'التقويم الصيني', calTitle_gregory: 'التاريخ الميلادي', calTitle_coptic: 'التقويم القبطي',
-    btOn: 'متصل', btOff: 'غير متصل', battery: 'البطارية',
+    btOn: 'متصل', btOff: 'غير متصل', battery: 'البطارية', lyrics: 'الكلمات', gMorning: 'صباح الخير', gAfternoon: 'مساء الخير', gEvening: 'مساء الخير', gNight: 'تصبح على خير', screenTime: 'وقت الشاشة', mShort: 'د', rainAround: 'أمطار حوالي', snowAround: 'ثلوج حوالي', stormAround: 'عواصف حوالي', wxWarn_storm: 'عاصفة رعدية متوقعة', wxWarn_rain: 'أمطار غزيرة متوقعة', wxWarn_snow: 'ثلوج كثيفة متوقعة', wxWarn_heat: 'حرارة شديدة', wxWarn_cold: 'برد شديد', wxWarn_wind: 'رياح قوية', vs: 'ضد', ft: 'انتهت', goal: 'هدف!', openGate: 'افتح بوابة المعبد', kickoff: 'بداية المباراة', follow: 'متابعة هذه المباراة', unfollow: 'إلغاء المتابعة', openMatch: 'فتح صفحة المباراة',
   },
 };
 const t = k => (T[LANG] && T[LANG][k]) ?? T.en[k] ?? k;
@@ -257,23 +267,62 @@ function islamicOccasions(h) {
 }
 
 /* ------------------------------------------------------------------ sound */
+// All sounds are synthesized here (original compositions, no sound files).
+//   adhan  — an airy "welcome": a warm pad swells while a soft bell arpeggio rises, then a high shimmer
+//   focus  — three bright notes          hour — two soft notes          warn — three gentle falling tones
+//   bell   — Pharaonic: bronze temple bell + sistrum shake (used for the Pharaonic theme's alerts)
 function chime(vol = 0.7, kind = 'adhan') {
   try {
     const ac = chime.ac || (chime.ac = new AudioContext());
     if (ac.state === 'suspended') ac.resume();
-    const notes = kind === 'focus' ? [[659.25, 0], [987.77, 0.2], [1318.5, 0.4]]
-      : [[523.25, 0], [659.25, 0.4], [783.99, 0.8], [1046.5, 1.2], [783.99, 2.2], [1046.5, 2.6]];
-    const master = ac.createGain(); master.gain.value = Math.max(0, Math.min(1, vol)) * 0.45; master.connect(ac.destination);
-    for (const [f, at] of notes) {
-      const t0 = ac.currentTime + at + 0.05;
-      for (const [mul, g] of [[1, 1], [2.01, 0.32], [3.03, 0.1]]) {
+    const out = ac.createGain(); out.gain.value = Math.max(0, Math.min(1, vol)) * 0.5;
+    // a soft hall: generated impulse response (decaying stereo noise)
+    if (!chime.ir) {
+      const len = ac.sampleRate * 3.2, ir = ac.createBuffer(2, len, ac.sampleRate);
+      for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2); }
+      chime.ir = ir;
+    }
+    const verb = ac.createConvolver(); verb.buffer = chime.ir;
+    const wet = ac.createGain(); wet.gain.value = kind === 'adhan' || kind === 'bell' ? .55 : .3;
+    out.connect(ac.destination); out.connect(verb); verb.connect(wet); wet.connect(ac.destination);
+    const T = ac.currentTime + .05;
+    const tone = (f, at, dur, g, partials = [[1, 1], [2.01, .3], [3.02, .08]], type = 'sine') => {
+      for (const [mul, pg] of partials) {
         const o = ac.createOscillator(), e = ac.createGain();
-        o.type = 'sine'; o.frequency.value = f * mul;
-        e.gain.setValueAtTime(0.0001, t0);
-        e.gain.exponentialRampToValueAtTime(g, t0 + 0.012);
-        e.gain.exponentialRampToValueAtTime(0.0001, t0 + 2.8);
-        o.connect(e); e.connect(master); o.start(t0); o.stop(t0 + 2.9);
+        o.type = type; o.frequency.value = f * mul;
+        e.gain.setValueAtTime(.0001, T + at); e.gain.exponentialRampToValueAtTime(g * pg, T + at + .015);
+        e.gain.exponentialRampToValueAtTime(.0001, T + at + dur);
+        o.connect(e); e.connect(out); o.start(T + at); o.stop(T + at + dur + .05);
       }
+    };
+    if (kind === 'adhan') {
+      // warm pad: two slightly detuned saws through a slowly opening low-pass
+      const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(400, T); lp.frequency.exponentialRampToValueAtTime(2600, T + 1.6); lp.frequency.exponentialRampToValueAtTime(900, T + 4.2);
+      const pg = ac.createGain(); pg.gain.setValueAtTime(.0001, T); pg.gain.exponentialRampToValueAtTime(.16, T + 1.1); pg.gain.exponentialRampToValueAtTime(.0001, T + 4.6);
+      lp.connect(pg); pg.connect(out);
+      for (const [f, dt] of [[261.63, -4], [261.63, 5], [392, 0], [329.63, 3]]) { const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = dt; o.connect(lp); o.start(T); o.stop(T + 4.7); }
+      // rising bell arpeggio (Cmaj9) and a last airy shimmer
+      [[523.25, .25], [659.25, .48], [783.99, .71], [987.77, .94], [1174.66, 1.17]].forEach(([f, at]) => tone(f, at, 3.2, .42, [[1, 1], [2.0, .22], [3.99, .06]]));
+      tone(2093, 1.45, 2.6, .12, [[1, 1], [1.5, .3]]);
+    } else if (kind === 'bell') {
+      // bronze temple bell (inharmonic partials) …
+      tone(196, 0, 4.2, .5, [[1, 1], [2.0, .55], [2.76, .4], [4.07, .22], [5.4, .12]]);
+      tone(392, .9, 3, .22, [[1, 1], [2.76, .35], [5.4, .1]]);
+      // … and a sistrum: quick shakes of bright metallic noise
+      for (let k = 0; k < 6; k++) {
+        const len = ac.sampleRate * .09, b = ac.createBuffer(1, len, ac.sampleRate), d = b.getChannelData(0);
+        for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
+        const s = ac.createBufferSource(); s.buffer = b;
+        const hp = ac.createBiquadFilter(); hp.type = 'bandpass'; hp.frequency.value = 6500; hp.Q.value = 2.5;
+        const g = ac.createGain(); g.gain.value = .22;
+        s.connect(hp); hp.connect(g); g.connect(out); s.start(T + .15 + k * .13);
+      }
+    } else if (kind === 'hour') {
+      tone(783.99, 0, 2.2, .35); tone(1046.5, .32, 2.6, .3);
+    } else if (kind === 'warn') {
+      tone(880, 0, .9, .38); tone(698.46, .28, .9, .36); tone(587.33, .56, 1.6, .36);
+    } else {
+      tone(659.25, 0, 2.4, .5); tone(987.77, .2, 2.4, .45); tone(1318.5, .4, 2.6, .4);
     }
   } catch { }
 }

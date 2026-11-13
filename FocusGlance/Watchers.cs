@@ -193,6 +193,76 @@ sealed class BluetoothWatcher
     };
 }
 
+/// <summary>
+/// Today's screen time: every 5 s, the app in front gets 5 s — unless nobody has touched the PC for 2 minutes.
+/// Kept only in %LocalAppData%\FocusGlance\screentime.json; never sent anywhere.
+/// </summary>
+sealed class ScreenTime
+{
+    readonly System.Windows.Forms.Timer timer = new() { Interval = 5000 };
+    readonly string path = Path.Combine(SettingsStore.DataDir, "screentime.json");
+    readonly Dictionary<string, string> names = new();
+    string day = DateTime.Today.ToString("yyyy-MM-dd");
+    Dictionary<string, int> apps = new();
+    int ticks;
+    public bool Enabled { get; set; } = true;
+
+    public ScreenTime()
+    {
+        try
+        {
+            if (File.Exists(path) && System.Text.Json.JsonSerializer.Deserialize<Saved>(File.ReadAllText(path)) is { } s && s.Day == day)
+                apps = s.Apps ?? new();
+        }
+        catch { }
+        timer.Tick += (_, _) => Tick();
+    }
+
+    public void Start() => timer.Start();
+
+    void Tick()
+    {
+        if (!Enabled) return;
+        var today = DateTime.Today.ToString("yyyy-MM-dd");
+        if (today != day) { day = today; apps.Clear(); }
+        if (Native.IdleMs() > 120_000) return;
+        var fg = Native.Foreground(); if (fg == IntPtr.Zero) return;
+        var name = AppName(Native.WindowProcessId(fg)); if (name == null) return;
+        apps[name] = apps.GetValueOrDefault(name) + 5;
+        if (++ticks % 12 == 0) Save();   // once a minute
+    }
+
+    string? AppName(uint pid)
+    {
+        try
+        {
+            using var p = Process.GetProcessById((int)pid);
+            var exe = p.ProcessName;
+            if (exe is "explorer" or "ShellExperienceHost" or "SearchHost" or "StartMenuExperienceHost" or "LockApp" or "Focus-with-a-glance") return null;
+            if (names.TryGetValue(exe, out var n)) return n;
+            string? desc = null;
+            try { desc = p.MainModule?.FileVersionInfo.FileDescription; } catch { }
+            n = string.IsNullOrWhiteSpace(desc) ? exe : desc.Trim();
+            names[exe] = n;
+            return n;
+        }
+        catch { return null; }
+    }
+
+    void Save()
+    {
+        try { File.WriteAllText(path, System.Text.Json.JsonSerializer.Serialize(new Saved { Day = day, Apps = apps })); } catch { }
+    }
+
+    public object Snapshot()
+    {
+        var top = apps.OrderByDescending(kv => kv.Value).FirstOrDefault();
+        return new { t = "st", total = apps.Values.Sum(), top = top.Key, topSecs = top.Value };
+    }
+
+    sealed class Saved { public string Day { get; set; } = ""; public Dictionary<string, int>? Apps { get; set; } }
+}
+
 /// <summary>Microsoft Store add-on ("Pharaonic pack"). Only the Store build can buy or own it.</summary>
 static class Licenses
 {

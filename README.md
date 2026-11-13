@@ -28,7 +28,7 @@ arrows.
 | 🌙 **Ramadan mode** | Iftar and suhoor countdowns and the fasting day, automatic during Ramadan |
 | 📅 **Hijri date** | Umm al-Qura and three other calendars, Arabic or English, four styles, ±2 day moon-sighting adjustment |
 | 💱 **Currency** | Live rate between any two of ~160 currencies with a quick converter |
-| ⛅ **Weather** | Current conditions for your location |
+| ⛅ **Weather** | Current conditions and a 6-day forecast, with a live weather scene inside the glass |
 | 🌍 **World clock** | Up to three time zones |
 | ⏳ **Countdown** | Your own dates, plus Ramadan, Eid, Arafah and the Islamic New Year |
 | 🎯 **Focus timer** | Pomodoro sessions with short and long breaks |
@@ -41,7 +41,10 @@ arrows.
 | 🎧 **Bluetooth** | Headphones and other devices show their name, battery and volume as they connect |
 | 🎮 **Stays out of the way** | Hides automatically during games, full-screen video and presentations |
 | 🗓️ **Calendars** | Gregorian, Hijri, Chinese lunar — and Coptic in the Pharaonic pack |
-| 𓋹 **Pharaonic pack** | Store add-on: Coptic calendar, lapis-and-gold glass, hieroglyphs and your name in a cartouche |
+| 𓋹 **Pharaonic pack** | Store add-on: Coptic calendar, sand glass and sand animations, gold icons, avatars, your name in a cartouche, a temple gate opened by the ankh |
+| 🌅 **Welcome card** | For 3 seconds at Windows start: greeting, weather, the next hours, what's playing and today's screen time |
+| ⚽ **Live football** | Scores, live minute and scorers for the competitions and teams you follow, with goal alerts (GitHub version) |
+| 🔔 **Gentle sounds** | An airy adhan chime, an optional chime on the hour, and severe-weather alerts |
 
 The whole interface, settings included, is available in **English, Arabic and Chinese**, with full right-to-left layout
 for Arabic. The first run asks for your language and sets things up for it.

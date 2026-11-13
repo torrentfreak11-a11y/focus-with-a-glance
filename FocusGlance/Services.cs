@@ -85,6 +85,7 @@ public sealed class SettingsStore
     public string Position => Get("position", "center");
     public bool Pinned => Get("pinned", false);
     public bool AutoHide => Get("autoHide", true);
+    public bool ScreenTimeOn => Get("screenTime", true);
 
     public List<string> IcalUrls
     {
@@ -109,8 +110,9 @@ static class Startup
         {
             using var key = Registry.CurrentUser.OpenSubKey(RunKey, writable: true);
             if (key == null) return;
+            // --startup tells the app it was started by Windows (shows the welcome card)
             if (enabled && Environment.ProcessPath is string exe)
-                key.SetValue(ValueName, $"\"{exe}\"");
+                key.SetValue(ValueName, $"\"{exe}\" --startup");
             else if (!enabled && key.GetValue(ValueName) != null)
                 key.DeleteValue(ValueName, false);
         }

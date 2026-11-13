@@ -22,7 +22,8 @@ contains only what is needed to answer it, and the services' own privacy policie
 | api.aladhan.com | Prayer times | Coordinates and calculation method |
 | api.open-meteo.com, geocoding-api.open-meteo.com | Weather, city search | Coordinates, or the city name you type |
 | open.er-api.com | Exchange rates | The base currency |
-| lrclib.net | Synced lyrics | Title, artist and length of the song playing |
+| lrclib.net | Synced lyrics, only when you tap the lyrics button (or pin lyrics) | Title, artist and length of the song playing |
+| site.api.espn.com, a.espncdn.com | Live football scores and team flags (free GitHub version only; turn off in Settings → Sports) | The competitions you follow |
 | calendar.google.com | Meet countdown, only if you add iCal links | Your private iCal link |
 
 Like any internet request, these services can see your IP address.
@@ -32,6 +33,12 @@ Like any internet request, these services can see your IP address.
 To show the mini player and volume overlay, the app reads the current media title, artist and artwork, and the
 system volume level, from Windows. This information is only shown on screen and, for lyrics, sent to lrclib.net
 as described above.
+
+## Screen time
+
+To show today's screen time on the welcome card, the app notes every few seconds which app is in front (only
+while you are using the PC). The daily totals per app are kept in `%LocalAppData%\FocusGlance\screentime.json`,
+are never sent anywhere, and restart each day. Turn it off in Settings → General → Screen time.
 
 ## Bluetooth
 

@@ -43,6 +43,15 @@ static class Native
     [DllImport("shell32.dll")] public static extern int SHQueryUserNotificationState(out int state);
     public static uint WindowProcessId(IntPtr h) { GetWindowThreadProcessId(h, out uint pid); return pid; }
 
+    [StructLayout(LayoutKind.Sequential)] struct LASTINPUTINFO { public uint cbSize, dwTime; }
+    [DllImport("user32.dll")] static extern bool GetLastInputInfo(ref LASTINPUTINFO i);
+    /// <summary>Milliseconds since the last keyboard or mouse input.</summary>
+    public static long IdleMs()
+    {
+        var i = new LASTINPUTINFO { cbSize = (uint)Marshal.SizeOf<LASTINPUTINFO>() };
+        return GetLastInputInfo(ref i) ? (uint)Environment.TickCount - i.dwTime : 0;
+    }
+
     /// <summary>SetForegroundWindow that also works when another app currently owns the foreground.</summary>
     public static void ForceForeground(IntPtr h)
     {

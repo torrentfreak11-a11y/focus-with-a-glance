@@ -53,6 +53,8 @@ input{-webkit-user-select:text;user-select:text}
 [dir=rtl] .sw:checked::after{right:21px}
 /* segmented */
 .seg{display:inline-flex;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:2px;gap:2px}
+.lgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;padding:14px}
+.lgrid label{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--fg2)}
 .seg button{all:unset;cursor:pointer;padding:5px 12px;border-radius:7px;color:var(--fg2);font-size:12.5px;white-space:nowrap}
 .seg button:hover{color:var(--fg)}
 .seg button.on{background:color-mix(in srgb,var(--acc) 30%,rgba(255,255,255,.08));color:#fff;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 45%,transparent)}
@@ -162,12 +164,12 @@ const ST = {
     source: 'Source code', sourceD: 'Open source on GitHub. Ideas and bug reports are welcome.', privacy: 'Privacy policy', open: 'Open',
     calendars: 'Calendars', calLead: 'Your main calendar and a second one shown beside it.', primaryCal: 'Main calendar', extraCal: 'Second calendar',
     calNone: 'None', calgregory: 'Gregorian', calislamic: 'Hijri', calchinese: 'Chinese', calcoptic: 'Coptic', hijriOpts: 'Hijri options',
-    behavior: 'Behavior', compactWx: 'Weather beside the clock', compactWxD: 'An animated sun, moon, cloud or rain next to the time.',
+    sports: 'Sports', sportsLead: 'Live football scores in the notch, with goal alerts for your teams.', sportsOn: 'Live matches', onlyFavs: 'Only my teams', onlyFavsD: 'Show only matches of your favourite teams (and a game you follow).', favTeams: 'Favourite teams', favTeamsD: 'One per line, e.g. Egypt, Al Ahly, Real Madrid. Their matches come first, with kick-off and goal alerts.', leagues: 'Competitions', espnNote: 'Scores come from ESPN’s public scoreboard. Tap ☆ on a match card to follow that game.', cMatch: 'Live match', cMatchD: 'Score and minute of the match you care about.', behavior: 'Behavior', hourChime: 'Chime on the hour', hourChimeD: 'A soft chime every hour, 7:00 to 23:00. Silent during meetings.', weatherAlerts: 'Severe weather alerts', weatherAlertsD: 'Storms, heavy rain or snow, strong gusts, extreme heat or cold in the next 12 hours.', welcomeCard: 'Welcome card at startup', welcomeCardD: 'For 3 seconds when Windows starts: greeting, weather, what is playing and your screen time.', screenTime: 'Screen time', screenTimeD: 'Counts how long you use each app today. Stays on this PC only.', compactWx: 'Weather beside the clock', compactWxD: 'An animated sun, moon, cloud or rain next to the time.',
     autoHide: 'Hide during games and full-screen video', autoHideD: 'The notch fades away and comes back when you leave full screen.',
     btOverlay: 'Bluetooth devices', btOverlayD: 'Show the device name, battery and volume when headphones or other devices connect.',
     theme: 'Theme', thGlass: 'Liquid glass', thPharaoh: 'Pharaonic', glyphs: 'Hieroglyphs', glyphsD: 'Decorative hieroglyphs beside English, and your name in a cartouche.',
     pharaohPack: 'Pharaonic pack', pharaohD: 'Coptic calendar, a lapis-and-gold Pharaonic theme, hieroglyph decorations and your name in a cartouche.',
-    thSounds: 'Theme sounds', thSoundsD: 'A soft desert-wind whoosh when the sand moves.', buy: 'Get it', owned: 'Unlocked — thank you!', inStore: 'Available in the Microsoft Store version.', locked: '🔒',
+    avatar: 'Avatar', avatarD: 'Shown on the welcome screen beside your name.', avPharaoh: 'Pharaoh', avQueen: 'Queen', avScribe: 'Scribe', avCat: 'Bastet', avNone: 'None', thSounds: 'Theme sounds', thSoundsD: 'A soft desert-wind whoosh when the sand moves.', buy: 'Get it', owned: 'Unlocked — thank you!', inStore: 'Available in the Microsoft Store version.', locked: '🔒',
   },
   zh: {
     general: '常规', cards: '卡片', prayer: '礼拜时间', adhan: '宣礼与斋月', currency: '货币', hijri: '日历',
@@ -219,12 +221,12 @@ const ST = {
     source: '源代码', sourceD: '在 GitHub 上开源。欢迎提出想法和反馈问题。', privacy: '隐私政策', open: '打开',
     calendars: '日历', calLead: '你的主日历，以及显示在旁边的第二种日历。', primaryCal: '主日历', extraCal: '第二日历',
     calNone: '无', calgregory: '公历', calislamic: '伊斯兰历', calchinese: '农历', calcoptic: '科普特历', hijriOpts: '伊斯兰历选项',
-    behavior: '行为', compactWx: '时钟旁显示天气', compactWxD: '时间旁边会出现动态的太阳、月亮、云或雨。',
+    sports: '体育', sportsLead: '在刘海中显示足球实时比分，并为你的球队提供进球提醒。', sportsOn: '实时比赛', onlyFavs: '只看我的球队', onlyFavsD: '只显示你喜爱球队的比赛（以及你关注的比赛）。', favTeams: '喜爱的球队', favTeamsD: '每行一个，例如 Egypt、Al Ahly、Real Madrid。他们的比赛优先显示，并有开球和进球提醒。', leagues: '赛事', espnNote: '比分来自 ESPN 的公开比分板。在比赛卡片上点 ☆ 即可关注该场比赛。', cMatch: '实时比赛', cMatchD: '你关心的比赛的比分和时间。', behavior: '行为', hourChime: '整点报时', hourChimeD: '7:00 到 23:00 每小时一声轻柔的铃声，会议期间静音。', weatherAlerts: '恶劣天气提醒', weatherAlertsD: '未来 12 小时内的雷暴、大雨或大雪、强阵风、极端高温或低温。', welcomeCard: '启动欢迎卡片', welcomeCardD: 'Windows 启动时显示 3 秒：问候、天气、正在播放和屏幕使用时间。', screenTime: '屏幕使用时间', screenTimeD: '统计你今天使用每个应用的时长。仅保存在这台电脑上。', compactWx: '时钟旁显示天气', compactWxD: '时间旁边会出现动态的太阳、月亮、云或雨。',
     autoHide: '游戏和全屏视频时隐藏', autoHideD: '刘海会淡出，退出全屏后再回来。',
     btOverlay: '蓝牙设备', btOverlayD: '耳机或其他设备连接时，显示设备名称、电量和音量。',
     theme: '主题', thGlass: '液态玻璃', thPharaoh: '法老', glyphs: '象形文字', glyphsD: '在英文旁加入装饰性象形文字，并把你的名字写进王名圈。',
     pharaohPack: '法老扩展包', pharaohD: '科普特历、青金石与黄金的法老主题、象形文字装饰，以及写进王名圈的名字。',
-    thSounds: '主题音效', thSoundsD: '沙子移动时伴随轻柔的沙漠风声。', buy: '获取', owned: '已解锁——谢谢你！', inStore: '在 Microsoft Store 版本中提供。', locked: '🔒',
+    avatar: '头像', avatarD: '显示在欢迎界面你的名字旁边。', avPharaoh: '法老', avQueen: '王后', avScribe: '书记官', avCat: '巴斯特', avNone: '无', thSounds: '主题音效', thSoundsD: '沙子移动时伴随轻柔的沙漠风声。', buy: '获取', owned: '已解锁——谢谢你！', inStore: '在 Microsoft Store 版本中提供。', locked: '🔒',
   },
   ar: {
     general: 'عام', cards: 'البطاقات', prayer: 'أوقات الصلاة', adhan: 'الأذان ورمضان', currency: 'العملات', hijri: 'التقاويم',
@@ -277,12 +279,12 @@ const ST = {
     source: 'الشفرة المصدرية', sourceD: 'مفتوحة المصدر على GitHub. نرحب بالأفكار والإبلاغ عن الأخطاء.', privacy: 'سياسة الخصوصية', open: 'فتح',
     calendars: 'التقاويم', calLead: 'تقويمك الأساسي وتقويم ثانٍ يظهر بجانبه.', primaryCal: 'التقويم الأساسي', extraCal: 'التقويم الثاني',
     calNone: 'بدون', calgregory: 'الميلادي', calislamic: 'الهجري', calchinese: 'الصيني', calcoptic: 'القبطي', hijriOpts: 'خيارات التاريخ الهجري',
-    behavior: 'السلوك', compactWx: 'الطقس بجانب الساعة', compactWxD: 'شمس أو قمر أو غيوم أو مطر متحركة بجانب الوقت.',
+    sports: 'الرياضة', sportsLead: 'نتائج مباريات كرة القدم مباشرة في الشريط، مع تنبيه الأهداف لفرقك.', sportsOn: 'المباريات المباشرة', onlyFavs: 'فرقي فقط', onlyFavsD: 'عرض مباريات فرقك المفضلة فقط (والمباراة التي تتابعها).', favTeams: 'الفرق المفضلة', favTeamsD: 'فريق في كل سطر، مثل Egypt أو Al Ahly أو Real Madrid. مبارياتهم تظهر أولاً مع تنبيه البداية والأهداف.', leagues: 'البطولات', espnNote: 'النتائج من لوحة نتائج ESPN العامة. اضغط ☆ في بطاقة المباراة لمتابعتها.', cMatch: 'المباراة المباشرة', cMatchD: 'النتيجة والدقيقة للمباراة التي تهمك.', behavior: 'السلوك', hourChime: 'رنة كل ساعة', hourChimeD: 'رنة هادئة كل ساعة من 7:00 إلى 23:00، صامتة أثناء الاجتماعات.', weatherAlerts: 'تنبيهات الطقس الشديد', weatherAlertsD: 'العواصف والأمطار أو الثلوج الغزيرة والرياح القوية والحر أو البرد الشديد خلال 12 ساعة.', welcomeCard: 'بطاقة الترحيب عند التشغيل', welcomeCardD: 'لمدة 3 ثوانٍ عند بدء Windows: الترحيب والطقس وما يُشغَّل ووقت الشاشة.', screenTime: 'وقت الشاشة', screenTimeD: 'يحسب مدة استخدامك لكل تطبيق اليوم. يبقى على هذا الجهاز فقط.', compactWx: 'الطقس بجانب الساعة', compactWxD: 'شمس أو قمر أو غيوم أو مطر متحركة بجانب الوقت.',
     autoHide: 'الإخفاء أثناء الألعاب والفيديو بملء الشاشة', autoHideD: 'يختفي الشريط بهدوء ويعود عند الخروج من ملء الشاشة.',
     btOverlay: 'أجهزة البلوتوث', btOverlayD: 'عرض اسم الجهاز والبطارية ومستوى الصوت عند توصيل السماعات أو غيرها.',
     theme: 'المظهر', thGlass: 'زجاج سائل', thPharaoh: 'فرعوني', glyphs: 'الهيروغليفية', glyphsD: 'زخارف هيروغليفية بجانب الإنجليزية، واسمك داخل خرطوش.',
     pharaohPack: 'الباقة الفرعونية', pharaohD: 'التقويم القبطي، ومظهر فرعوني باللازورد والذهب، وزخارف هيروغليفية، واسمك داخل خرطوش.',
-    thSounds: 'أصوات المظهر', thSoundsD: 'صوت ريح صحراوية خفيف مع حركة الرمال.', buy: 'احصل عليها', owned: 'مفعّلة — شكراً لك!', inStore: 'متاحة في نسخة متجر Microsoft.', locked: '🔒',
+    avatar: 'الصورة الرمزية', avatarD: 'تظهر في شاشة الترحيب بجانب اسمك.', avPharaoh: 'فرعون', avQueen: 'ملكة', avScribe: 'كاتب', avCat: 'باستت', avNone: 'بدون', thSounds: 'أصوات المظهر', thSoundsD: 'صوت ريح صحراوية خفيف مع حركة الرمال.', buy: 'احصل عليها', owned: 'مفعّلة — شكراً لك!', inStore: 'متاحة في نسخة متجر Microsoft.', locked: '🔒',
   },
 };
 const s = k => (ST[LANG] && ST[LANG][k]) ?? ST.en[k] ?? k;
@@ -342,10 +344,14 @@ const SECTIONS = [
     `<h2>${s("behavior")}</h2>` + card(
     row(s("compactWx"), s("compactWxD"), toggle("compactWeather")),
     row(s("autoHide"), s("autoHideD"), toggle("autoHide")),
-    row(s("btOverlay"), s("btOverlayD"), toggle("btOverlay")))],
+    row(s("btOverlay"), s("btOverlayD"), toggle("btOverlay")),
+    row(s("welcomeCard"), s("welcomeCardD"), toggle("welcomeCard")),
+    row(s("screenTime"), s("screenTimeD"), toggle("screenTime")),
+    row(s("hourChime"), s("hourChimeD"), toggle("hourChime")),
+    row(s("weatherAlerts"), s("weatherAlertsD"), toggle("weatherAlerts")))],
 
   ['cards', '🧩', () => head(s('cards'), s('cardsLead')) + card(
-    ...[['hijri', 'cHijri'], ['prayer', 'cPrayer'], ['fx', 'cFx'], ['weather', 'cWeather'], ['world', 'cWorld'], ['events', 'cEvents'], ['focus', 'cFocus'], ['meet', 'cMeet'], ['media', 'cMedia']]
+    ...[['hijri', 'cHijri'], ['prayer', 'cPrayer'], ['fx', 'cFx'], ['weather', 'cWeather'], ['world', 'cWorld'], ['events', 'cEvents'], ['focus', 'cFocus'], ['meet', 'cMeet'], ['media', 'cMedia'], ...(lic.store ? [] : [['match', 'cMatch']])]
       .map(([k, l]) => row(s(l), s(l + 'D'), toggle('cards.' + k))))],
 
   ['prayer', '🕌', () => {
@@ -434,6 +440,13 @@ const SECTIONS = [
       (cfg.islamicEvents ? `<h2>${s('upcoming')}</h2><div class="card">${occ}</div>` : '');
   }],
 
+  ['sports', '⚽', () => head(s('sports'), s('sportsLead')) + card(
+    row(s('sportsOn'), '', toggle('sports.enabled')),
+    row(s('onlyFavs'), s('onlyFavsD'), toggle('sports.onlyFavs'))) +
+    `<h2>${s('favTeams')}</h2><div class="card"><div class="hint">${s('favTeamsD')}</div><div style="padding:0 14px 14px"><textarea id="teams" spellcheck="false" style="min-height:70px" placeholder="Egypt&#10;Al Ahly&#10;Real Madrid">${esc(cfg.sports.teams.join('\n'))}</textarea></div></div>` +
+    `<h2>${s('leagues')}</h2><div class="card"><div class="lgrid">${LEAGUES.map(([id, n]) => `<label><input type="checkbox" class="sw" data-league="${id}" ${cfg.sports.leagues.includes(id) ? 'checked' : ''}>${esc(n)}</label>`).join('')}</div></div>` +
+    `<div class="hint" style="margin-top:10px">ⓘ ${s('espnNote')}</div>`],
+
   ['meet', '📹', () => head(s('meet'), s('meetLead')) +
     `<div class="card"><div class="row"><div class="rl"><b>${s('ical')}</b><small>${s('icalD')}</small></div></div>` +
     `<div style="padding:0 14px 14px"><textarea id="ical" spellcheck="false" placeholder="https://calendar.google.com/calendar/ical/…/basic.ics">${esc(cfg.icalUrls.join('\n'))}</textarea></div></div>` +
@@ -441,7 +454,7 @@ const SECTIONS = [
 
   ['look', '🎨', () => head(s('look'), s('lookLead')) + card(
     row(s('theme'), '', seg('theme', [['glass', s('thGlass')], ['pharaoh', '𓋹 ' + s('thPharaoh'), 1]])),
-    cfg.theme === 'pharaoh' && lic.pharaoh ? row(s('glyphs'), s('glyphsD'), toggle('glyphs')) + row(s('thSounds'), s('thSoundsD'), toggle('themeSounds')) : '',
+    cfg.theme === 'pharaoh' && lic.pharaoh ? row(s('glyphs'), s('glyphsD'), toggle('glyphs')) + row(s('thSounds'), s('thSoundsD'), toggle('themeSounds')) + row(s('avatar'), s('avatarD'), seg('avatar', [['pharaoh', s('avPharaoh')], ['queen', s('avQueen')], ['scribe', s('avScribe')], ['cat', s('avCat')], ['none', s('avNone')]])) : '',
     row(s('accent'), '',`<div class="sws">${ACCENTS.map(c => `<button class="swatch ${cfg.accent === c ? 'on' : ''}" style="background:${c}" data-act="set" data-k="accent" data-v="${c}"></button>`).join('')}</div>`),
     row(s('glass'), '', `<div class="sws">${GLASSES.map(([c, n]) => `<button class="swatch ${cfg.glass === c ? 'on' : ''}" title="${n}" style="background:${c}" data-act="set" data-k="glass" data-v="${c}"></button>`).join('')}</div>`),
     row(s('tint'), s('tintD'), range('tint', 0, 80, 2))) +
@@ -467,7 +480,7 @@ function renderAll() {
   document.title = s('general');
   $('#ver').textContent = version ? 'v' + version : '';
   if (!SECTIONS.some(x => x[0] === cur)) cur = 'general';
-  $('#nav').innerHTML = SECTIONS.map(([id, ic]) => `<button data-nav="${id}" class="${id === cur ? 'on' : ''}"><span class="e">${ic}</span>${s(id)}</button>`).join('');
+  $('#nav').innerHTML = SECTIONS.filter(x => !(x[0] === 'sports' && lic.store)).map(([id, ic]) => `<button data-nav="${id}" class="${id === cur ? 'on' : ''}"><span class="e">${ic}</span>${s(id)}</button>`).join('');
   renderSec();
 }
 function renderSec() {
@@ -558,6 +571,8 @@ document.addEventListener('change', e => {
 document.addEventListener('input', e => {
   const el = e.target;
   if (el.id === 'ical') { cfg.icalUrls = el.value.split(/\r?\n/).map(x => x.trim()).filter(Boolean); save(); return; }
+  if (el.id === 'teams') { cfg.sports.teams = el.value.split(/\r?\n/).map(x => x.trim()).filter(Boolean); save(); return; }
+  if (el.dataset.league) { const L = new Set(cfg.sports.leagues); el.checked ? L.add(el.dataset.league) : L.delete(el.dataset.league); cfg.sports.leagues = LEAGUES.map(x => x[0]).filter(x => L.has(x)); save(); return; }
   if (el.dataset.list) { listSet(el); return; }
   if (!el.dataset.k || el.type === 'checkbox' || el.tagName === 'SELECT') return;
   if (el.type === 'number' && el.value === '') return;

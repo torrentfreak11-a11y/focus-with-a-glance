@@ -12,6 +12,8 @@ static class Program
 {
     /// <summary>Started by the app itself after its browser engine died: skip the greeting.</summary>
     public static bool Restarted { get; private set; }
+    /// <summary>Started by Windows at sign-in (the Run entry passes --startup; the Store startup task can't, so a fresh boot counts too).</summary>
+    public static bool AtStartup { get; private set; }
 
     [STAThread]
     static void Main(string[] args)
@@ -23,6 +25,7 @@ static class Program
         catch (AbandonedMutexException) { owned = true; }
         if (!owned) return;
         Restarted = args.Contains("--restart");
+        AtStartup = !Restarted && (args.Contains("--startup") || Environment.TickCount64 < 4 * 60_000);
         // never vanish silently: log anything unexpected and keep running when it is safe to
         Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
         Application.ThreadException += (_, e) => GlanceForm.Crash("ui", e.Exception);
@@ -42,6 +45,7 @@ static class Web
     {
         "ipwho.is", "ipapi.co", "api.aladhan.com", "api.open-meteo.com", "geocoding-api.open-meteo.com",
         "open.er-api.com", "lrclib.net",
+        "site.api.espn.com",   // live football (GitHub build only; the Store build hides the sports card)
     };
 
     public static string Version => Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "";
@@ -127,6 +131,7 @@ sealed class GlanceForm : Form
     SettingsWindow? settingsWindow;
     FullscreenWatcher? fullscreen;
     BluetoothWatcher? bluetooth;
+    readonly ScreenTime screenTime = new();
     public bool Pharaoh { get; private set; }
     bool hiddenForFullscreen;
 
@@ -250,6 +255,8 @@ sealed class GlanceForm : Form
         fullscreen.Start();
         bluetooth = new BluetoothWatcher(Post);
         bluetooth.Start();
+        screenTime.Enabled = Store.ScreenTimeOn;
+        screenTime.Start();
         Pharaoh = await Licenses.HasPharaohAsync(Handle);
         SendLicense();
     }
@@ -332,7 +339,8 @@ sealed class GlanceForm : Form
             case "ready":
                 ready = true;
                 // placement, license and restart state first: the settings message starts the widget
-                Post(new { t = "place", tb = Math.Round(taskbarH), restarted = Program.Restarted });
+                Post(new { t = "place", tb = Math.Round(taskbarH), restarted = Program.Restarted, startup = Program.AtStartup });
+                Post(screenTime.Snapshot());
                 Post(new { t = "lic", pharaoh = Pharaoh, store = AppInfo.IsPackaged });
                 SendSettings();
                 lastVol = -1; PollVolume();
@@ -345,6 +353,14 @@ sealed class GlanceForm : Form
                 break;
             case "buy":
                 BuyPharaoh();
+                break;
+            case "st?":
+                Post(screenTime.Snapshot());
+                break;
+            case "open":   // the match card's link: ESPN match pages only
+                if (Uri.TryCreate((string?)n["url"], UriKind.Absolute, out var u) && u.Scheme == "https" &&
+                    (u.Host == "www.espn.com" || u.Host.EndsWith(".espn.com")))
+                    try { Process.Start(new ProcessStartInfo(u.ToString()) { UseShellExecute = true }); } catch { }
                 break;
             case "fetch":
                 _ = Web.Fetch(Http, (int)n["id"]!, (string)n["url"]!, Post);
@@ -388,6 +404,7 @@ sealed class GlanceForm : Form
         Store.Replace(data);
         Startup.Apply(Store.StartWithWindows);
         autostartItem.Checked = Store.StartWithWindows;
+        screenTime.Enabled = Store.ScreenTimeOn;
         if (oldPlace != Store.Monitor + "|" + Store.Position) PlaceWindow();
         if (oldIcal != string.Join("\n", Store.IcalUrls)) calendar?.Start(Store.IcalUrls);
         SendSettings();

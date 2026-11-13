@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.3.0
+
+- **Welcome card** for 3 seconds when Windows starts: greeting by time of day, date, current weather, the next 6
+  hours, a rain/snow/storm summary, what is playing, and today's **screen time** with your top app
+- **Weather card** now shows the next 6 days; a live weather scene plays inside the glass (rain, snow, sun rays,
+  stars, clouds, fog, lightning, wind)
+- **Live football** (GitHub build): score pill and match card with flags, live minute, scorers, team colours;
+  pick competitions and favourite teams, follow a single game, goal and kick-off alerts (scores from ESPN)
+- **Lyrics only when you ask**: a lyrics button on the player; no empty "no lyrics" windows
+- **Sounds**: a new airy adhan chime, optional chime on the hour, severe-weather alerts (storms, heavy rain or
+  snow, strong gusts, extreme heat or cold)
+- Standard **settings cog on every card**
+- **Pharaonic pack**: sand-coloured glass with grainy edges, sand that pours, scatters and gathers, desert-wind
+  sounds, a bronze bell and sistrum for alerts, engraved-gold icons for every card, an ankh settings cog,
+  four avatars (Pharaoh, Queen, Scribe, Bastet), your name in a cartouche, and a **temple gate opened by the ankh**
+  instead of the wave
+- Fixed: wide greeting pills no longer run off the screen in the top-left/right positions
+
 ## 2.2.1
 
 - Fixed: after an adhan with an iqama countdown, the widget stayed on the prayer card instead of returning to the
